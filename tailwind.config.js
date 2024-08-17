@@ -8,8 +8,8 @@ module.exports = {
       colors: {
         customBlue: '#254E70',
         lightblueBackground: '#F3F7FD',
-        blueActive: '#3E86B9',
-        blueInactive: '#89B8DA',
+        blueInactive: '#3E86B9',
+        blueActive: '#89B8DA',
         greenBackground: '#228689',
     },
   },

@@ -42,7 +42,7 @@ export default function Login() {
                 </button>
                 <a
                 href="/recuperar-contraseña"
-                className="mt-6 text-3xs font-medium text-blueActive hover:underline block text-center mx-auto"
+                className="mt-6 text-3xs font-medium text-blueInactive hover:underline block text-center mx-auto"
                 >¿Olvidaste tu contraseña?</a>
               </div>
             </div>
