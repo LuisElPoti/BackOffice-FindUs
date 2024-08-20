@@ -11,6 +11,8 @@ module.exports = {
         blueInactive: '#3E86B9',
         blueActive: '#89B8DA',
         greenBackground: '#228689',
+        blueSidebar: "#E4EDFB",
+        blueSelect: "#CBDEF0"
     },
   },
   plugins: [],
