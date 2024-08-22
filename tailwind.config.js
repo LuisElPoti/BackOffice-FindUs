@@ -12,7 +12,7 @@ module.exports = {
         blueActive: '#89B8DA',
         greenBackground: '#228689',
         blueSidebar: "#E4EDFB",
-        blueSelect: "#CBDEF0"
+        blueSelect: "#CBDEF0",
     },
   },
   plugins: [],

@@ -1,3 +1,6 @@
+"use client";
+import SideBar from "./components/sidebar";
+
 export default function Page() {
-  return <h1>Hello, Home page!</h1>
+  return <SideBar></SideBar>
 }
