@@ -14,8 +14,8 @@ export default function SideBar() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 text-gray-900 flex items-start">
-            {/* <div className="max-w-screen-xl m-0 sm:m-10 bg-white shadow sm:rounded-lg flex flex-1"> */}
+        //<div className="min-h-screen bg-gray-100 text-gray-900 flex items-start">
+            //<div className="max-w-screen-xl m-0 sm:m-10 bg-white shadow sm:rounded-lg flex flex-1">
                 <div className="w-1/5 bg-blueSidebar min-h-screen flex flex-col items-start py-6 pb-10">
                     <div className="flex items-center ml-6 mb-7">
                         <img
@@ -46,7 +46,7 @@ export default function SideBar() {
                             <BiSolidAmbulance className="w-6 h-6 ml-8"></BiSolidAmbulance>
                             <h4 className="ml-5">Servicios de emergencia</h4>
                         </div>
-                        <div className="w-full text-customBlue flex items-center pt-44">
+                        <div className="w-full text-customBlue flex items-center pt-48">
                             <MdOutlineSettings className="w-6 h-6 ml-8"></MdOutlineSettings>
                             <h4 className="ml-5 font-bold">Configuración</h4>
                         </div>
@@ -59,7 +59,7 @@ export default function SideBar() {
                             </div>
                         </div>
                 </div>
-            {/* </div> */}
-        </div>
+            //</div>
+        //</div>
     );
 }
