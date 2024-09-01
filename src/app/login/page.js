@@ -41,7 +41,7 @@ export default function Login() {
                   <span className="ml-1">Iniciar Sesión</span>
                 </button>
                 <a
-                href="/recuperar-contraseña"
+                href="/restablecerContrasena"
                 className="mt-6 text-3xs font-medium text-blueInactive hover:underline block text-center mx-auto"
                 >¿Olvidaste tu contraseña?</a>
               </div>
