@@ -7,24 +7,24 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
-function createData(ID, nombre, rol, estatus) {
-    return { ID, nombre, rol, estatus };
+function createData(ID, nombre, fechaDesaparicion, estatus) {
+    return { ID, nombre, fechaDesaparicion, estatus };
 }
 
 const rows = [
-    createData(1105980, 'Luis Vargas Colon', 'Básico', 'ACTIVO'),
-    createData(1105981, 'Rosanna Bautista Minyety', 'Administrador', 'ACTIVO'),
-    createData(1105982, 'William Fernandez Cruz', 'Básico', 'INACTIVO'),
-    createData(1105983, 'Cristian Castro Garcia', 'Básico', 'ACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'ACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'ACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'INACTIVO'),    
+    createData(1105980, 'Luis Vargas Colon', '14/09/2024', 'ACTIVO'),
+    createData(1105981, 'Rosanna Bautista Minyety', '15/09/2024', 'ACTIVO'),
+    createData(1105982, 'William Fernandez Cruz', '15/09/2024', 'INACTIVO'),
+    createData(1105983, 'Cristian Castro Garcia', '14/10/2024', 'ACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '24/10/2024', 'INACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'ACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'ACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),    
 ];
 
 export default function MyTable() {
@@ -58,7 +58,7 @@ export default function MyTable() {
                         <TableRow>
                             <TableCell align="left" className="font-bold">ID</TableCell>
                             <TableCell align="left" className="font-bold">Nombre</TableCell>
-                            <TableCell align="left" className="font-bold">Rol</TableCell>
+                            <TableCell align="left" className="font-bold">Fecha desaparición</TableCell>
                             <TableCell align="center" className="font-bold">Estatus</TableCell>
                             <TableCell align="left"></TableCell>
                         </TableRow>
@@ -71,7 +71,7 @@ export default function MyTable() {
                             >
                                 <TableCell align="left">{row.ID}</TableCell>
                                 <TableCell align="left">{row.nombre}</TableCell>
-                                <TableCell align="left">{row.rol}</TableCell>
+                                <TableCell align="left">{row.fechaDesaparicion}</TableCell>
                                 <TableCell align="center">
                                     <div className='text-xs text-blueBorder border border-blueBorder px-0.5 py-1 bg-blueInside rounded-sm'>
                                         {row.estatus}

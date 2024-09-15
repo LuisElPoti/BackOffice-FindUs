@@ -23,6 +23,8 @@ module.exports = {
         colorResumen: "#F3F7FD",
         blueBorder: "#2E5AAC",
         blueInside: "#F3F7FD",
+        blueBoton: "#3E86B9",
+        blueOscuro: "#204C6B"
     },
   },
   plugins: [],
