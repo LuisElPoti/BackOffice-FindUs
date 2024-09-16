@@ -24,7 +24,8 @@ module.exports = {
         blueBorder: "#2E5AAC",
         blueInside: "#F3F7FD",
         blueBoton: "#3E86B9",
-        blueOscuro: "#204C6B"
+        blueOscuro: "#204C6B",
+        blueBackground: "#F3F7FD",
     },
   },
   plugins: [],
