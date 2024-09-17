@@ -73,7 +73,7 @@ export default function MyTable() {
                                 <TableCell align="left">{row.nombre}</TableCell>
                                 <TableCell align="left">{row.rol}</TableCell>
                                 <TableCell align="center">
-                                    <div className='text-xs text-blueBorder border border-blueBorder px-0.5 py-1 bg-blueInside rounded-sm'>
+                                    <div className='text-xs text-blueBorder border border-blueBorder py-1 bg-blueInside rounded-sm'>
                                         {row.estatus}
                                     </div>
                                 </TableCell>
