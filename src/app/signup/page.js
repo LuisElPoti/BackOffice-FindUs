@@ -31,6 +31,14 @@ export default function SignUp() {
     documento: Yup.string()
       .matches(/^\d{8,12}$/, "Documento no válido")
       .required("El documento es requerido"),
+    tipoDocumento: Yup.string().required("El tipo de documento es requerido"),
+    fechaNacimiento: Yup.date()
+      .required("La fecha de nacimiento es requerida")
+      .nullable()
+      .max(new Date(), "La fecha de nacimiento no puede ser mayor a la fecha actual"),
+      confirmarContrasena: Yup.string()
+      .oneOf([Yup.ref('contrasena'), null], 'Las contraseñas no coinciden')
+      .required('Es necesario confirmar la contraseña'),
   });
 
   const formik = useFormik({
@@ -41,6 +49,8 @@ export default function SignUp() {
       contrasena: "",
       telefono: "",
       documento: "",
+      tipoDocumento: "",
+      fechaNacimiento: "",
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
@@ -102,6 +112,19 @@ export default function SignUp() {
                   <div className="text-red-500 text-xs mt-1">{formik.errors.apellidos}</div>
                 ) : null}
               </div>
+              <div>
+                <h3 className="text-1xl font-medium text-customBlue">Fecha de nacimiento</h3>
+                <input
+                  className="w-full px-4 py-2 rounded-lg font-medium text-gray-500 bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                  type="date"
+                  name="fechaNacimiento"
+                  value={formik.values.fechaNacimiento}
+                  onChange={formik.handleChange}
+                />
+                {formik.touched.fechaNacimiento && formik.errors.fechaNacimiento ? (
+                  <div className="text-red-500 text-xs mt-1">{formik.errors.fechaNacimiento}</div>
+                ) : null}
+              </div>
               {/* Campos restantes */}
               <div>
                 <h3 className="text-1xl font-medium text-customBlue">Correo</h3>
@@ -115,20 +138,6 @@ export default function SignUp() {
                 />
                 {formik.touched.correo && formik.errors.correo ? (
                   <div className="text-red-500 text-xs mt-1">{formik.errors.correo}</div>
-                ) : null}
-              </div>
-              <div>
-                <h3 className="text-1xl font-medium text-customBlue">Teléfono</h3>
-                <input
-                  className="w-full px-4 py-2 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                  type="text"
-                  placeholder="Ingresa tu teléfono"
-                  name="telefono"
-                  value={formik.values.telefono}
-                  onChange={formik.handleChange}
-                />
-                {formik.touched.telefono && formik.errors.telefono ? (
-                  <div className="text-red-500 text-xs mt-1">{formik.errors.telefono}</div>
                 ) : null}
               </div>
               <div>
@@ -146,7 +155,38 @@ export default function SignUp() {
                 ) : null}
               </div>
               <div>
-                <h3 className="text-1xl font-medium text-customBlue">Documento</h3>
+                <h3 className="text-1xl font-medium text-customBlue">Confirmar Contraseña</h3>
+                <input
+                  className="w-full px-4 py-2 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                  type="password"
+                  placeholder="Confirma tu contraseña"
+                  name="confirmarContrasena"
+                  value={formik.values.confirmarContrasena}
+                  onChange={formik.handleChange}
+                />
+                {formik.touched.confirmarContrasena && formik.errors.confirmarContrasena ? (
+                  <div className="text-red-500 text-xs mt-1">{formik.errors.confirmarContrasena}</div>
+                ) : null}
+              </div>
+              <div>
+                <h3 className="text-1xl font-medium text-customBlue">Tipo de documento de identidad</h3>
+                <select
+                  className="w-full px-2 py-2 rounded-lg font-medium text-gray-500 bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                  type="text"
+                  name="tipoDocumento"
+                  value={formik.values.tipoDocumento}
+                  onChange={formik.handleChange}
+                >
+                  <option value="" label="Selecciona un tipo de documento"></option>
+                  <option value="Cédula" label="Cédula"></option>
+                  <option value="Pasaporte" label="Pasaporte"></option>
+                </select>
+                {formik.touched.tipoDocumento && formik.errors.tipoDocumento ? (
+                  <div className="text-red-500 text-xs mt-1">{formik.errors.tipoDocumento}</div>
+                ) : null}
+              </div>
+              <div>
+                <h3 className="text-1xl font-medium text-customBlue">Número de documento de identidad</h3>
                 <input
                   className="w-full px-4 py-2 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                   type="text"
@@ -160,6 +200,20 @@ export default function SignUp() {
                 ) : null}
               </div>
             </div>
+            <div>
+                <h3 className="text-1xl font-medium text-customBlue mt-6">Número de Teléfono</h3>
+                <input
+                  className="w-full px-4 py-2 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                  type="text"
+                  placeholder="Ingresa tu teléfono"
+                  name="telefono"
+                  value={formik.values.telefono}
+                  onChange={formik.handleChange}
+                />
+                {formik.touched.telefono && formik.errors.telefono ? (
+                  <div className="text-red-500 text-xs mt-1">{formik.errors.telefono}</div>
+                ) : null}
+              </div>
             <button
               type="submit"
               className="mt-12 tracking-wide font-semibold bg-blueInactive text-white w-full py-3 rounded-lg hover:bg-blueActive transition-all duration-300 ease-in-out flex items-center justify-center"
@@ -212,7 +266,12 @@ export default function SignUp() {
               renderInput={(props) => <input {...props} />} 
             />
             <button
-              className="mt-4 bg-blueInactive text-white py-2 px-4 rounded-lg"
+              className={`mt-4 text-white py-2 px-4 rounded-lg
+              ${otp.length < 6 
+                ? 'bg-gray-300 cursor-not-allowed'
+                : 'bg-blueInactive hover:bg-blueActive'}`
+
+              }
               onClick={closeModal}
               disabled={otp.length < 6}  // Deshabilita el botón si el código no tiene 6 dígitos
             >
