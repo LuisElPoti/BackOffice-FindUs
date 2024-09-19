@@ -1,25 +1,55 @@
 "use client";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { useState } from "react";
+import { use, useState, useEffect } from "react";
 import { Player } from '@lottiefiles/react-lottie-player';
 import OtpInput from "react-otp-input";
+import { obtenerTiposDocumentos } from "/services/catalogoServices";
+import {registrarUsuario,formato_nombres,confirmarCorreo} from "/services/userService";
 
 export default function SignUp() {
   const [modalVisible, setModalVisible] = useState(false);
-  const [otp, setOtp] = useState("");	
+  const [sendingUserData, setSendingUserData] = useState(false);
+  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [apiRessponse, setApiResponse] = useState();
+  const [data, setData] = useState(
+    [{ nombreTipoDocumento: 'NA', id: 1 }]
+);	
 
+const hideRegisterStatusModalOnSuccess = () => {
+  setVisibleRegisterStatusModal(false);
+  formik.resetForm();
+  window.location = "../login";
+}
+
+
+const handleConfirm = () => {
+  // Aquí puedes manejar la confirmación del código
+  setSendingCode(true);
+  confirmarCorreo({codigoVerificacion: code.join(""),email: apiRessponse?.data.email}).then((response) => {
+       console.log("Respuesta de la peticiónnnnnnnnnnnnnnn:", response);
+      if(response.status == 200){
+          setApiResponse({...response, verifyingCode: true});
+      }else{
+          setApiResponse({...apiRessponse, status: response.status,data:{...apiRessponse?.data, message: response.data.message}});
+          setSendingCode(false);
+      }
+  }
+  );
+   console.log(code.join(""));
+   console.log("Código confirmado");
+};
   const validationSchema = Yup.object().shape({
-    nombre: Yup.string()
+    nombres: Yup.string()
       .required("El nombre es requerido")
       .matches(/^[a-zA-Z]+$/, "El nombre solo debe contener letras"),
     apellidos: Yup.string()
       .required("Los apellidos son requeridos")
       .matches(/^[a-zA-Z]+$/, "Los apellidos solo deben contener letras"),
-    correo: Yup.string()
+    email: Yup.string()
       .email("Correo no es válido")
       .required("El correo es requerido"),
-    telefono: Yup.string()
+    numeroTelefono: Yup.string()
       .matches(/^\d+$/, "El teléfono solo debe contener números")
       .required("El teléfono es requerido"),
     contrasena: Yup.string()
@@ -28,36 +58,75 @@ export default function SignUp() {
       .matches(/[A-Z]/, "La contraseña debe tener al menos una letra mayúscula")
       .matches(/\d/, "La contraseña debe tener al menos un número")
       .matches(/[!@#$%^&*(),.?":{}|<>]/, "La contraseña debe tener al menos un caracter especial"),
-    documento: Yup.string()
+    numero_documento: Yup.string()
       .matches(/^\d{8,12}$/, "Documento no válido")
       .required("El documento es requerido"),
-    tipoDocumento: Yup.string().required("El tipo de documento es requerido"),
+    IdTipoDocumento: Yup.string().required("El tipo de documento es requerido"),
     fechaNacimiento: Yup.date()
       .required("La fecha de nacimiento es requerida")
       .nullable()
       .max(new Date(), "La fecha de nacimiento no puede ser mayor a la fecha actual"),
-      confirmarContrasena: Yup.string()
+      confirmar_contrasena: Yup.string()
       .oneOf([Yup.ref('contrasena'), null], 'Las contraseñas no coinciden')
       .required('Es necesario confirmar la contraseña'),
   });
 
   const formik = useFormik({
     initialValues: {
-      nombre: "",
+      nombres: "",
       apellidos: "",
-      correo: "",
+      email: "",
       contrasena: "",
-      telefono: "",
-      documento: "",
-      tipoDocumento: "",
-      fechaNacimiento: "",
+      confirmar_contrasena: "",
+      numeroTelefono: "",
+      numero_documento: "",
+      IdTipoDocumento: "",
+      fechaNacimiento: new Date(),
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
-      console.log(values);
-      setModalVisible(true); // Mostrar el modal cuando el formulario se envíe
-    },
+      setSendingUserData(true);
+      values.nombres = formato_nombres(values.nombres);
+      values.apellidos = formato_nombres(values.apellidos);
+      values.IdTipoDocumento = parseInt(values.IdTipoDocumento);
+      registrarUsuario(values).then((response) => {
+        console.log("Respuesta de la peticion: ", response.data);
+        setApiResponse({status: response.status, data: response.data, verifyingCode: false});
+        if(response.status == 400){
+          if(response?.data?.message.includes("email")){
+            formik.setFieldValue("email", "");
+          }
+          if(response?.data?.message.includes("documento")) {
+            formik.setFieldValue("numero_documento", "");
+          }
+        }
+      });
+    }
   });
+
+  useEffect(() => {
+    if(apiRessponse?.status == 200){
+        if(apiRessponse?.verifyingCode){
+          setModalVisible(true);
+        }else{
+            setSendingUserData(false);
+            showEmailConfirmationModal();
+        }
+    }
+}
+, [apiRessponse]);
+
+ useEffect(() => {
+        // console.log("useEffect ejecutado");
+        formik.validateForm();
+        obtenerTiposDocumentos().then((response) => {
+            // console.log("Respuesta de la petición:", response.data);
+            if(response.status == 200){
+                setData(response.data);
+            }
+    });
+    }, []);
+
 
   // Función para cerrar el modal
   const closeModal = () => {
@@ -89,12 +158,12 @@ export default function SignUp() {
                   className="w-full px-4 py-2 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                   type="text"
                   placeholder="Ingresa tu nombre"
-                  name="nombre"
-                  value={formik.values.nombre}
+                  name="nombres"
+                  value={formik.values.nombres}
                   onChange={formik.handleChange}
                 />
-                {formik.touched.nombre && formik.errors.nombre ? (
-                  <div className="text-red-500 text-xs mt-1">{formik.errors.nombre}</div>
+                {formik.touched.nombres && formik.errors.nombres ? (
+                  <div className="text-red-500 text-xs mt-1">{formik.errors.nombres}</div>
                 ) : null}
               </div>
               {/* Campo Apellidos */}
@@ -125,19 +194,18 @@ export default function SignUp() {
                   <div className="text-red-500 text-xs mt-1">{formik.errors.fechaNacimiento}</div>
                 ) : null}
               </div>
-              {/* Campos restantes */}
               <div>
                 <h3 className="text-1xl font-medium text-customBlue">Correo</h3>
                 <input
                   className="w-full px-4 py-2 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                   type="email"
                   placeholder="Ingresa tu correo"
-                  name="correo"
-                  value={formik.values.correo}
+                  name="email"
+                  value={formik.values.email}
                   onChange={formik.handleChange}
                 />
-                {formik.touched.correo && formik.errors.correo ? (
-                  <div className="text-red-500 text-xs mt-1">{formik.errors.correo}</div>
+                {formik.touched.email && formik.errors.email ? (
+                  <div className="text-red-500 text-xs mt-1">{formik.errors.email}</div>
                 ) : null}
               </div>
               <div>
@@ -160,12 +228,12 @@ export default function SignUp() {
                   className="w-full px-4 py-2 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                   type="password"
                   placeholder="Confirma tu contraseña"
-                  name="confirmarContrasena"
-                  value={formik.values.confirmarContrasena}
+                  name="confirmar_contrasena"
+                  value={formik.values.confirmar_contrasena}
                   onChange={formik.handleChange}
                 />
-                {formik.touched.confirmarContrasena && formik.errors.confirmarContrasena ? (
-                  <div className="text-red-500 text-xs mt-1">{formik.errors.confirmarContrasena}</div>
+                {formik.touched.confirmar_contrasena && formik.errors.confirmar_contrasena ? (
+                  <div className="text-red-500 text-xs mt-1">{formik.errors.confirmar_contrasena}</div>
                 ) : null}
               </div>
               <div>
@@ -173,16 +241,16 @@ export default function SignUp() {
                 <select
                   className="w-full px-2 py-2 rounded-lg font-medium text-gray-500 bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                   type="text"
-                  name="tipoDocumento"
-                  value={formik.values.tipoDocumento}
+                  name="IdTipoDocumento"
+                  value={formik.values.IdTipoDocumento}
                   onChange={formik.handleChange}
                 >
                   <option value="" label="Selecciona un tipo de documento"></option>
-                  <option value="Cédula" label="Cédula"></option>
-                  <option value="Pasaporte" label="Pasaporte"></option>
+                  <option value="1" label="Cédula"></option>
+                  <option value="2" label="Pasaporte"></option>
                 </select>
-                {formik.touched.tipoDocumento && formik.errors.tipoDocumento ? (
-                  <div className="text-red-500 text-xs mt-1">{formik.errors.tipoDocumento}</div>
+                {formik.touched.IdTipoDocumento && formik.errors.IdTipoDocumento ? (
+                  <div className="text-red-500 text-xs mt-1">{formik.errors.IdTipoDocumento}</div>
                 ) : null}
               </div>
               <div>
@@ -191,12 +259,12 @@ export default function SignUp() {
                   className="w-full px-4 py-2 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                   type="text"
                   placeholder="Ingresa tu documento"
-                  name="documento"
-                  value={formik.values.documento}
+                  name="numero_documento"
+                  value={formik.values.numero_documento}
                   onChange={formik.handleChange}
                 />
-                {formik.touched.documento && formik.errors.documento ? (
-                  <div className="text-red-500 text-xs mt-1">{formik.errors.documento}</div>
+                {formik.touched.numero_documento && formik.errors.numero_documento ? (
+                  <div className="text-red-500 text-xs mt-1">{formik.errors.numero_documento}</div>
                 ) : null}
               </div>
             </div>
@@ -206,16 +274,17 @@ export default function SignUp() {
                   className="w-full px-4 py-2 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                   type="text"
                   placeholder="Ingresa tu teléfono"
-                  name="telefono"
-                  value={formik.values.telefono}
+                  name="numeroTelefono"
+                  value={formik.values.numeroTelefono}
                   onChange={formik.handleChange}
                 />
-                {formik.touched.telefono && formik.errors.telefono ? (
-                  <div className="text-red-500 text-xs mt-1">{formik.errors.telefono}</div>
+                {formik.touched.numeroTelefono && formik.errors.numeroTelefono ? (
+                  <div className="text-red-500 text-xs mt-1">{formik.errors.numeroTelefono}</div>
                 ) : null}
               </div>
             <button
               type="submit"
+              handleSubmit={formik.handleSubmit}
               className="mt-12 tracking-wide font-semibold bg-blueInactive text-white w-full py-3 rounded-lg hover:bg-blueActive transition-all duration-300 ease-in-out flex items-center justify-center"
             >
               <span className="ml-1">Crear Cuenta</span>
