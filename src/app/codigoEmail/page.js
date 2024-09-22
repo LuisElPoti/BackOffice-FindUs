@@ -10,7 +10,6 @@ export default function Login() {
   const handleInputChange = (e, index) => {
     const value = e.target.value;
 
-    // Only allow numeric values
     if (/^[0-9]$/.test(value)) {
       if (index < inputsRef.current.length - 1) {
         inputsRef.current[index + 1].focus();
@@ -26,8 +25,8 @@ export default function Login() {
     }
   };
 
-  const codigoEmail = () => {
-    router.push('/codigoEmail');
+  const validarContrasena = () => {
+    router.push('/validarContrasena');
   };
 
   return (
@@ -47,13 +46,13 @@ export default function Login() {
           </div>
           <div className="mb-8">
             <h3 className="text-1xl font text-customBlue">
-              Introduce el código de 4 dígitos que enviamos a tu correo.
+              Introduce el código de 6 dígitos que enviamos a tu correo.
             </h3>
           </div>
           <div className="flex flex-col items-center">
             <div className="w-full max-w-md">
               <div className="flex space-x-2">
-                {[...Array(4)].map((_, index) => (
+                {[...Array(6)].map((_, index) => (
                   <input
                     key={index}
                     type="text"
@@ -66,7 +65,7 @@ export default function Login() {
                 ))}
               </div>
               <button
-                onClick={codigoEmail}
+                onClick={validarContrasena} 
                 className="mt-12 tracking-wide font-semibold bg-blueInactive text-white w-full py-4 rounded-lg hover:bg-blueActive transition-all duration-300 ease-in-out flex items-center justify-center"
               >
                 <span className="ml-1">Confirmar</span>
