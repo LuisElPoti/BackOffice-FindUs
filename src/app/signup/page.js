@@ -1,33 +1,47 @@
 "use client";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { use, useState, useEffect } from "react";
+import {useState, useEffect } from "react";
+import {useRouter} from "next/navigation";
 import { Player } from '@lottiefiles/react-lottie-player';
 import OtpInput from "react-otp-input";
-import { obtenerTiposDocumentos } from "/services/catalogoServices";
-import {registrarUsuario,formato_nombres,confirmarCorreo} from "/services/userService";
+import { obtenerTiposDocumentos } from "../../../services/catalogoServices"
+import {registrarUsuario,formato_nombres,confirmarCorreo} from "../../../services/userService";
+import { FaEye, FaEyeSlash} from "react-icons/fa6";
+import { toast,ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+
 
 export default function SignUp() {
+  const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
   const [sendingUserData, setSendingUserData] = useState(false);
-  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [sendingCode, setSendingCode] = useState(false);
+  // const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [apiRessponse, setApiResponse] = useState();
+  const [otp, setOtp] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [data, setData] = useState(
     [{ nombreTipoDocumento: 'NA', id: 1 }]
 );	
 
-const hideRegisterStatusModalOnSuccess = () => {
-  setVisibleRegisterStatusModal(false);
-  formik.resetForm();
-  window.location = "../login";
-}
+
+const showToast = async (promise, mensaje) => {
+  return toast.promise(promise, {
+    pending: mensaje,
+    // success: 'Usuario registrado correctamente.',
+    // autoClose: 8000,
+  },{position: "top-center",className: "w-auto"});
+};
 
 
 const handleConfirm = () => {
   // Aquí puedes manejar la confirmación del código
   setSendingCode(true);
-  confirmarCorreo({codigoVerificacion: code.join(""),email: apiRessponse?.data.email}).then((response) => {
-       console.log("Respuesta de la peticiónnnnnnnnnnnnnnn:", response);
+  showToast(confirmarCorreo({codigoVerificacion: otp,email: apiRessponse?.data.email}),"Verificando Código...").then((response) => {
+       console.log("Respuesta de la peticiónnnnnnnnnnnnnnn de CODIGOOOOOO:", response);
       if(response.status == 200){
           setApiResponse({...response, verifyingCode: true});
       }else{
@@ -36,16 +50,16 @@ const handleConfirm = () => {
       }
   }
   );
-   console.log(code.join(""));
+   console.log(otp);
    console.log("Código confirmado");
 };
   const validationSchema = Yup.object().shape({
     nombres: Yup.string()
       .required("El nombre es requerido")
-      .matches(/^[a-zA-Z]+$/, "El nombre solo debe contener letras"),
+      .matches(/^[a-zA-Z\s]+$/, "El nombre solo debe contener letras y espacios"),
     apellidos: Yup.string()
       .required("Los apellidos son requeridos")
-      .matches(/^[a-zA-Z]+$/, "Los apellidos solo deben contener letras"),
+      .matches(/^[a-zA-Z\s]+$/, "El apellido solo debe contener letras y espacios"),
     email: Yup.string()
       .email("Correo no es válido")
       .required("El correo es requerido"),
@@ -85,12 +99,13 @@ const handleConfirm = () => {
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
+      console.log("Valores del formulario: ", values);
       setSendingUserData(true);
       values.nombres = formato_nombres(values.nombres);
       values.apellidos = formato_nombres(values.apellidos);
       values.IdTipoDocumento = parseInt(values.IdTipoDocumento);
-      registrarUsuario(values).then((response) => {
-        console.log("Respuesta de la peticion: ", response.data);
+      showToast(registrarUsuario(values),"Registrando usuario...").then((response) => {
+        // console.log("Respuesta de la peticion: ", response.data);
         setApiResponse({status: response.status, data: response.data, verifyingCode: false});
         if(response.status == 400){
           if(response?.data?.message.includes("email")){
@@ -105,33 +120,40 @@ const handleConfirm = () => {
   });
 
   useEffect(() => {
+    console.log("useEffect ejecutado");
+    console.log("Respuesta de la petición:", apiRessponse);
     if(apiRessponse?.status == 200){
         if(apiRessponse?.verifyingCode){
-          setModalVisible(true);
+          toast.success("Correo confirmado correctamente. Redirigiendo a pantalla de login",{position: "top-center",autoClose: 5000,className: "w-auto"});
+          setTimeout(() => {
+            router.push("/login");
+          }, 5000);
         }else{
             setSendingUserData(false);
-            showEmailConfirmationModal();
+            setModalVisible(true);
         }
+    }else{
+      toast.error(apiRessponse?.data?.message,{position: "top-center",autoClose: 8000,className: "w-auto"});
+      if(apiRessponse?.verifyingCode){
+        setSendingCode(false);
+      }else{
+        setSendingUserData(false);
+      }
     }
 }
 , [apiRessponse]);
 
  useEffect(() => {
-        // console.log("useEffect ejecutado");
-        formik.validateForm();
+        // toast.success("Correo enviado correctamente",{position: "top-center"});
+        console.log("useEffect ejecutado");
         obtenerTiposDocumentos().then((response) => {
-            // console.log("Respuesta de la petición:", response.data);
+            console.log("Respuesta de la petición de Obbtener Tipos de Documentos:", response.data);
             if(response.status == 200){
                 setData(response.data);
             }
     });
     }, []);
 
-
-  // Función para cerrar el modal
-  const closeModal = () => {
-    setModalVisible(false);
-  };
 
   const handleOtpChange = (otpValue) => {
     const numericOtp = otpValue.replace(/\D/g, '');
@@ -140,6 +162,7 @@ const handleConfirm = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 flex justify-center">
+      <ToastContainer />
       <div className="max-w-screen-xl m-0 sm:m-6 bg-white shadow sm:rounded-lg flex justify-center flex-1">
         <div className="lg:w-3/5 xl:w-7/12 p-6 sm:p-12">
           <div className="flex items-center mb-4">
@@ -210,28 +233,55 @@ const handleConfirm = () => {
               </div>
               <div>
                 <h3 className="text-1xl font-medium text-customBlue">Contraseña</h3>
-                <input
-                  className="w-full px-4 py-2 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                  type="password"
-                  placeholder="Ingresa tu contraseña"
-                  name="contrasena"
-                  value={formik.values.contrasena}
-                  onChange={formik.handleChange}
-                />
+                <div className="relative">
+                    <input
+                      className="w-full px-4 py-2 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Ingresa tu contraseña"
+                      name="contrasena"
+                      value={formik.values.contrasena}
+                      onChange={formik.handleChange}
+                      
+                    />
+                    <button
+                      type="button"
+                      onClick={()=> {setShowPassword(!showPassword)}}
+                      className="absolute inset-y-0 right-0 flex items-center px-3"
+                    >
+                      {showPassword ? (
+                        <FaEyeSlash className="h-5 w-5 text-gray-500" aria-hidden="true" />
+                      ) : (
+                        <FaEye className="h-5 w-5 text-gray-500" aria-hidden="true" />
+                      )}
+                    </button>
+                </div>
                 {formik.touched.contrasena && formik.errors.contrasena ? (
                   <div className="text-red-500 text-xs mt-1">{formik.errors.contrasena}</div>
                 ) : null}
               </div>
               <div>
                 <h3 className="text-1xl font-medium text-customBlue">Confirmar Contraseña</h3>
-                <input
-                  className="w-full px-4 py-2 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                  type="password"
-                  placeholder="Confirma tu contraseña"
-                  name="confirmar_contrasena"
-                  value={formik.values.confirmar_contrasena}
-                  onChange={formik.handleChange}
-                />
+                <div className="relative">
+                  <input
+                    className="w-full px-4 py-2 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                    type={showPasswordConfirm ? "text" : "password"}
+                    placeholder="Confirma tu contraseña"
+                    name="confirmar_contrasena"
+                    value={formik.values.confirmar_contrasena}
+                    onChange={formik.handleChange}
+                  />
+                   <button
+                      type="button"
+                      onClick={()=> {setShowPasswordConfirm(!showPasswordConfirm)}}
+                      className="absolute inset-y-0 right-0 flex items-center px-3"
+                    >
+                      {showPasswordConfirm ? (
+                        <FaEyeSlash className="h-5 w-5 text-gray-500" aria-hidden="true" />
+                      ) : (
+                        <FaEye className="h-5 w-5 text-gray-500" aria-hidden="true" />
+                      )}
+                    </button>
+                </div>
                 {formik.touched.confirmar_contrasena && formik.errors.confirmar_contrasena ? (
                   <div className="text-red-500 text-xs mt-1">{formik.errors.confirmar_contrasena}</div>
                 ) : null}
@@ -246,8 +296,11 @@ const handleConfirm = () => {
                   onChange={formik.handleChange}
                 >
                   <option value="" label="Selecciona un tipo de documento"></option>
-                  <option value="1" label="Cédula"></option>
-                  <option value="2" label="Pasaporte"></option>
+                  {data.map((item) => (
+                    <option key={item.id} value={item.id} label={item.nombretipodocumento}></option>
+                  ))}
+                  {/* <option value="1" label="Cédula"></option>
+                  <option value="2" label="Pasaporte"></option> */}
                 </select>
                 {formik.touched.IdTipoDocumento && formik.errors.IdTipoDocumento ? (
                   <div className="text-red-500 text-xs mt-1">{formik.errors.IdTipoDocumento}</div>
@@ -284,8 +337,10 @@ const handleConfirm = () => {
               </div>
             <button
               type="submit"
-              handleSubmit={formik.handleSubmit}
-              className="mt-12 tracking-wide font-semibold bg-blueInactive text-white w-full py-3 rounded-lg hover:bg-blueActive transition-all duration-300 ease-in-out flex items-center justify-center"
+              onClick={formik.handleSubmit}
+              disabled={sendingUserData || !formik.isValid}
+              style={{ backgroundColor: sendingUserData || !formik.isValid ? "#B0B0B0" : "#3E86B9", }}
+              className="mt-12 tracking-wide font-semibold  text-white w-full py-3 rounded-lg hover:bg-blueActive transition-all duration-300 ease-in-out flex items-center justify-center"
             >
               <span className="ml-1">Crear Cuenta</span>
             </button>
@@ -336,13 +391,13 @@ const handleConfirm = () => {
             />
             <button
               className={`mt-4 text-white py-2 px-4 rounded-lg
-              ${otp.length < 6 
+              ${otp.length < 6 || sendingCode
                 ? 'bg-gray-300 cursor-not-allowed'
                 : 'bg-blueInactive hover:bg-blueActive'}`
 
               }
-              onClick={closeModal}
-              disabled={otp.length < 6}  // Deshabilita el botón si el código no tiene 6 dígitos
+              onClick={handleConfirm}
+              disabled={otp.length < 6 || sendingCode}  // Deshabilita el botón si el código no tiene 6 dígitos
             >
               Confirmar Correo
             </button>
