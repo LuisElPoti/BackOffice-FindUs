@@ -31,13 +31,13 @@ export default function Login() {
       login(values)
         .then((response) => {
           if (response.status === 200 && response.data.autenticado) {
-          
+            toast.success("Inicio de sesión exitoso", {position: "top-center",autoClose: 2000,className: "w-auto"});
             localStorage.setItem("token", response.data.token);
             setTimeout(() => {
               router.push("/");
-            }, 1000);
+            }, 500);
           } else {
-            toast.error(response.data.message || "Error al iniciar sesión");
+            toast.error(response.data.message || "Error al iniciar sesión", {position: "top-center",autoClose: 5000, className: "w-auto"});
             setSendingData(false);
           }
         })
