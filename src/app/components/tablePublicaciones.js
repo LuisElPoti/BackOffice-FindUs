@@ -6,38 +6,26 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { IoMdMore } from "react-icons/io";
 
-function createData(ID, nombre, rol, estatus) {
-    return { ID, nombre, rol, estatus };
+function createData(ID, nombre, fechaDesaparicion, estatus) {
+    return { ID, nombre, fechaDesaparicion, estatus };
 }
 
 const rows = [
-    createData(1105980, 'Luis Vargas Colon', 'Básico', 'ACTIVO'),
-    createData(1105981, 'Rosanna Bautista Minyety', 'Administrador', 'ACTIVO'),
-    createData(1105982, 'William Fernandez Cruz', 'Básico', 'INACTIVO'),
-    createData(1105983, 'Cristian Castro Garcia', 'Básico', 'ACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'ACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'ACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', 'Básico', 'INACTIVO'),    
+    createData(1105980, 'Luis Vargas Colon', '14/09/2024', 'ACTIVO'),
+    createData(1105981, 'Rosanna Bautista Minyety', '15/09/2024', 'ACTIVO'),
+    createData(1105982, 'William Fernandez Cruz', '15/09/2024', 'INACTIVO'),
+    createData(1105983, 'Cristian Castro Garcia', '14/10/2024', 'ACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '24/10/2024', 'INACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'ACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'ACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),
+    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),    
 ];
-
-function getStatusStyle(estatus) {
-    switch (estatus) {
-      case 'ACTIVO':
-        return { backgroundColor: '#F3F7FD', color: '#2E5AAC', border: '2px solid #89A7E0' };
-      case 'INACTIVO':
-        return { backgroundColor: '#F3F7FD', color: '#717171', border: '2px solid #CCCCCD' };
-      default:
-        return { backgroundColor: 'grey', color: 'white' };
-    }
-  }
 
 export default function MyTable() {
     return (
@@ -70,9 +58,9 @@ export default function MyTable() {
                         <TableRow>
                             <TableCell align="left" className="font-bold">ID</TableCell>
                             <TableCell align="left" className="font-bold">Nombre</TableCell>
-                            <TableCell align="left" className="font-bold">Rol</TableCell>
+                            <TableCell align="left" className="font-bold">Fecha desaparición</TableCell>
                             <TableCell align="center" className="font-bold">Estatus</TableCell>
-                            <TableCell align="right"></TableCell>
+                            <TableCell align="left"></TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -83,13 +71,13 @@ export default function MyTable() {
                             >
                                 <TableCell align="left">{row.ID}</TableCell>
                                 <TableCell align="left">{row.nombre}</TableCell>
-                                <TableCell align="left">{row.rol}</TableCell>
+                                <TableCell align="left">{row.fechaDesaparicion}</TableCell>
                                 <TableCell align="center">
-                                    <div className='text-xs border py-1 rounded-sm inline-block px-2' style={getStatusStyle(row.estatus)}>
+                                    <div className='text-xs text-blueBorder border border-blueBorder px-0.5 py-1 bg-blueInside rounded-sm'>
                                         {row.estatus}
                                     </div>
                                 </TableCell>
-                                <TableCell align="right"><IoMdMore className='w-5 h-5 cursor-pointer text-[#6B6C7E]'/></TableCell>
+                                <TableCell align="left"></TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
