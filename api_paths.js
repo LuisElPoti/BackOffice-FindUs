@@ -9,7 +9,7 @@ const apiRoutes = {
     solicitarCambioContrasena: () => `${API_BASE_URL}/user/solicitar_cambio_contrasena`,
     verificar_codigo_cambio_contrasena: () => `${API_BASE_URL}/user/verificar_codigo_cambio_contrasena`,
     cambiar_contrasena: () => `${API_BASE_URL}/user/cambiar_contrasena`,
-
+    loginUsuario: () => `${API_BASE_URL}/user/login`,
 
     //Rutas Tipo de Documento
     obtenerTiposDocumentos: () => `${API_BASE_URL}/tipo_documento/obtenerTipoDocumento`,

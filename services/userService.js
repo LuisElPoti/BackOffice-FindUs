@@ -62,13 +62,23 @@ const  cambiarContrasena = async (data, token) => {
     }
 }
 
+const login = async (data) => {
+    try {
+        const response = await axios.post(apiRoutes.loginUsuario(), data);
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
 
 //Exportar funciones
-module.exports = {
+export {
     registrarUsuario,
     formato_nombres,
     confirmarCorreo,
     solicitarCambioContrasena,
     verificarCodigoCambioContrasena,
     cambiarContrasena,
-}
+    login
+};
