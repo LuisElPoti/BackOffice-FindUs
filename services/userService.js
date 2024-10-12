@@ -62,13 +62,38 @@ const  cambiarContrasena = async (data, token) => {
     }
 }
 
+const  verificarToken = async (token) => {
+    try {
+        const response = await axios.get(apiRoutes.verificar_token_valido(), {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
+
+const login = async (data) => {
+    try {
+        const response = await axios.post(apiRoutes.loginUsuario(), data);
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
 
 //Exportar funciones
-module.exports = {
+export {
     registrarUsuario,
     formato_nombres,
     confirmarCorreo,
     solicitarCambioContrasena,
     verificarCodigoCambioContrasena,
     cambiarContrasena,
-}
+    login,
+    verificarToken
+};
