@@ -156,6 +156,9 @@ const handleConfirm = () => {
 
 
   const handleOtpChange = (otpValue) => {
+    if(otpValue == ""){
+      return;
+    }
     const numericOtp = otpValue.replace(/\D/g, '');
     setOtp(numericOtp);
   };
