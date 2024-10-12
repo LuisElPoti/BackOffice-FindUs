@@ -7,6 +7,7 @@ import Users from "./users/page";
 import Publicaciones from "./publicaciones/page";
 import Material from "./material/page";
 import Servicios from "./servicios/page";
+import Configuration from "./configuration/page";
 
 export default function Page() {
 
@@ -22,6 +23,7 @@ export default function Page() {
       {selectedScreen === 'publicaciones' && <Publicaciones/>}
       {selectedScreen === 'material' && <Material/>}
       {selectedScreen === 'servicios' && <Servicios/>}
+      {selectedScreen === 'configuration' && <Configuration/>}
       </div>
     </div>
 
