@@ -1,7 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Popup from "reactjs-popup";
 import 'reactjs-popup/dist/index.css';
+import Mapa from '@/app/components/map'
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 
 export default function Publicaciones() {
@@ -22,6 +25,121 @@ export default function Publicaciones() {
             [section]: true,
         }));
     };
+
+    const validationSchema = Yup.object({
+        nombre_desaparecido: Yup.string().required("Este campo es obligatorio"),
+        id_tipo_documento: Yup.number().required("Este campo es obligatorio"),
+        documento_desaparecido: Yup.string().required("Este campo es obligatorio"),
+        telefono: Yup.string().required("Este campo es obligatorio"),
+        fecha_desaparicion: Yup.date().required("Este campo es obligatorio"),
+        descripcion_desaparecido: Yup.string().required("Este campo es obligatorio"),
+        relacion_desaparecido: Yup.string().required("Este campo es obligatorio"),
+        contacto: Yup.string().required("Este campo es obligatorio"),
+        fecha_nacimiento: Yup.date().required("Este campo es obligatorio"),
+    });
+
+    const formik = useFormik({
+        initialValues: {
+          nombre_desaparecido: "",
+          id_tipo_documento: "",
+          documento_desaparecido: "",
+          telefono: "",
+          fecha_desaparicion: new Date(),
+          descripcion_desaparecido: "",
+          relacion_desaparecido: "",
+          contacto: "",
+          fecha_nacimiento: new Date(),
+          // idusuario: 24,
+          edad: new Date(),
+          ubicacion_latitud: "",
+          ubicacion_longitud: "",
+        },
+        validationSchema: validationSchema,
+        onSubmit: async (values) => {
+            console.log("Enviando datos: ", values);
+        //   setLoading(true);
+        //   try {
+        //     console.log("Fecha de nacimiento: ", values.fecha_nacimiento);
+        //     values.edad = calcularEdad(values.fecha_nacimiento);
+        //     values.id_tipo_documento = parseInt(values.id_tipo_documento);
+            
+        //     values.ubicacion_latitud = values.ubicacion_latitud.toString();
+        //     values.ubicacion_longitud = values.ubicacion_longitud.toString();
+      
+        //     console.log("Enviando datos: ", values);
+      
+        //     const response = await crearPublicacion(values,obtenerToken()); // Espera la respuesta
+        //     setApiResponse(response); // Guarda la respuesta para manejar el estado
+            
+        //     if (response.status === 200) {
+        //       console.log("Publicación creada correctamente: ", response.data);
+        //       const idPublicacion = response.data.idpublicacion;
+        //       console.log("Publicación creada correctamente: ", response.data);
+    
+        //       // Paso 2: Subir la imagen o el archivo si se proporcionó
+        //       if (imageData) {
+        //         const uploadData = {
+        //           idpublicacion: idPublicacion,
+        //           base64Image: imageData?.base64,
+        //           base64File: null,
+        //           fileName: imageData?.fileName,
+        //           mimeType: imageData?.mimeType
+        //         };
+    
+        //         console.log("Datos de la imagen: ", "fileName:", uploadData.fileName, "mimeType:", uploadData.mimeType, "idPublicacion:", uploadData.idpublicacion);
+                
+        //         // Llamada a la API para subir la imagen/archivo
+        //         const uploadResponse = await subirArchivo(uploadData);
+        //         if (uploadResponse.status === 200) {
+        //           console.log("Imagen subida correctamente");
+        //         } else {
+        //           console.error("Error al subir la imagen", uploadResponse.data.message);
+        //         }
+        //       }
+    
+        //       if(documentData){
+        //         const uploadData = {
+        //           idpublicacion: idPublicacion,
+        //           base64Image: null,
+        //           base64File: documentData?.base64,
+        //           fileName: documentData?.fileName,
+        //           mimeType: documentData?.mimeType,
+        //         };
+    
+        //         console.log("Datos del archivo: ", "fileName:", uploadData.fileName, "mimeType:", uploadData.mimeType, "idPublicacion:", uploadData.idpublicacion);
+                
+        //         // // Llamada a la API para subir la imagen/archivo
+        //         const uploadResponse = await subirArchivo(uploadData, 'tu_token_aqui');
+        //         if (uploadResponse.status === 200) {
+        //           console.log("Archivo subido correctamente");
+        //         } else {
+        //           console.error("Error al subir el archivo: ", uploadResponse.data.message);
+        //         }
+        //       }
+              
+        //       setLoading(false);  
+        //       setModalVisible(true);
+        //       setTimeout(() => {
+        //         setModalVisible(false);
+        //         router.push("../home");
+        //       }, 2000);
+        //     } else {
+        //       console.log("Error al crear la publicación: ", response.data.message);
+        //       setModalVisible(true);
+        //       setLoading(false);
+        //     }
+        //   } catch (error) {
+        //     setModalVisible(true);
+        //     setLoading(false);
+        //     console.error("Error en la petición: ", error);
+        //   }
+        },
+    });
+
+    useEffect(() => {
+        console.log(formik.values);
+    }
+    , [formik.values]);
 
     return (
         <div className="flex flex-col h-screen overflow-hidden bg-colorResumen">
@@ -51,6 +169,8 @@ export default function Publicaciones() {
                     contentStyle={{
                         padding: '0px',
                         borderRadius: '8px',
+                        maxHeight: '90vh',
+                        overflowY: 'auto',
                     }}
                 >
                     <div className="p-8 bg-blueBackground rounded-md">
@@ -84,36 +204,64 @@ export default function Publicaciones() {
                                             <label className="block text-sm font-medium mb-2" htmlFor="name">Nombre completo:</label>
                                             <input
                                                 type="text"
-                                                id="name"
+                                                id="nombre_desaparecido"
+                                                name="nombre_desaparecido"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                                onChange={formik.handleChange}
+                                            />
+                                        </div>
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium mb-2" htmlFor="idNumber">Tipo de Documento de identidad:</label>
+                                            {/* <input
+                                                type="text"
+                                                id="idNumber"
                                                 className="w-full px-3 py-2 border border-gray-300 rounded"
                                                 onChange={() => handleInputChange('personalInfo')}
-                                            />
+                                            /> */}
+                                             <select
+                                                className="w-full px-3 py-3 rounded font-medium text-gray-500 border border-gray-300 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                                                type="text"
+                                                id="id_tipo_documento"
+                                                name="id_tipo_documento"
+                                                value={2}
+                                                onChange={formik.handleChange}
+                                                >
+                                                <option value="" label="Selecciona un tipo de documento"></option>
+                                                {/* {data.map((item) => (
+                                                    <option key={item.id} value={item.id} label={item.nombretipodocumento}></option>
+                                                ))} */}
+                                                <option value="1" label="Cédula"></option>
+                                                <option value="2" label="Pasaporte"></option>
+                                            </select>
                                         </div>
                                         <div className="mb-4">
                                             <label className="block text-sm font-medium mb-2" htmlFor="idNumber">Documento de identidad:</label>
                                             <input
                                                 type="text"
-                                                id="idNumber"
+                                                id="documento_desaparecido"
+                                                name="documento_desaparecido"
                                                 className="w-full px-3 py-2 border border-gray-300 rounded"
-                                                onChange={() => handleInputChange('personalInfo')}
+                                                onChange={formik.handleChange}
                                             />
                                         </div>
                                         <div className="mb-4">
                                             <label className="block text-sm font-medium mb-2" htmlFor="birthDate">Fecha de nacimiento:</label>
                                             <input
                                                 type="date"
-                                                id="birthDate"
+                                                id="fecha_nacimiento"
+                                                name="fecha_nacimiento"
                                                 className="w-full px-3 py-2 border border-gray-300 rounded"
-                                                onChange={() => handleInputChange('personalInfo')}
+                                                onChange={formik.handleChange}
                                             />
                                         </div>
                                         <div className="mb-4">
                                             <label className="block text-sm font-medium mb-2" htmlFor="disappearanceDate">Fecha de desaparición:</label>
                                             <input
                                                 type="date"
-                                                id="disappearanceDate"
+                                                id="fecha_desaparicion"
+                                                name="fecha_desaparicion"
                                                 className="w-full px-3 py-2 border border-gray-300 rounded"
-                                                onChange={() => handleInputChange('personalInfo')}
+                                                onChange={formik.handleChange}
                                             />
                                         </div>
                                     </div>
@@ -146,20 +294,35 @@ export default function Publicaciones() {
                                         <div className="mb-4">
                                             <label className="block text-sm font-medium mb-2" htmlFor="description">Descripción física:</label>
                                             <textarea
-                                                id="description"
+                                                id="descripcion_desaparecido"
+                                                name="descripcion_desaparecido"
                                                 className="w-full px-3 py-2 border border-gray-300 rounded"
-                                                rows="4"
-                                                onChange={() => handleInputChange('disappearanceDetails')}
+                                                rows="2"
+                                                onChange={formik.handleChange}
                                             />
                                         </div>
                                         <div className="mb-4">
-                                            <label className="block text-sm font-medium mb-2" htmlFor="lastSight">Detalles del último avistamiento:</label>
+                                            <label className="block text-sm font-medium mb-2" htmlFor="lastSight">Información de Contacto:</label>
                                             <textarea
-                                                id="lastSight"
+                                                id="contacto"
+                                                name="contacto"
                                                 className="w-full px-3 py-2 border border-gray-300 rounded"
-                                                rows="4"
-                                                onChange={() => handleInputChange('disappearanceDetails')}
+                                                rows="2"
+                                                onChange={formik.handleChange}
                                             />
+                                        </div>
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium mb-2" htmlFor="lastSight">Relación con el Desaparecido:</label>
+                                            <input
+                                                id="relacion_desaparecido"
+                                                name="relacion_desaparecido"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                                onChange={formik.handleChange}
+                                            />
+                                        </div>
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium mb-2" htmlFor="lastSight">Relación con el Desaparecido:</label>
+                                            <Mapa setFieldValue={formik.setFieldValue} lat_name={"ubicacion_latitud"}  long_name={"ubicacion_longitud"}/>
                                         </div>
                                     </div>
                                 )}
@@ -198,7 +361,7 @@ export default function Publicaciones() {
                                                 onChange={() => handleInputChange('documentUpload')}
                                             />
                                         </div>
-                                        <div className="mb-4">
+                                        {/* <div className="mb-4">
                                             <label className="block text-sm font-medium mb-2" htmlFor="policeReport">Documento de identidad:</label>
                                             <input
                                                 type="file"
@@ -206,7 +369,7 @@ export default function Publicaciones() {
                                                 className="w-full px-3 py-2 border border-gray-300 rounded"
                                                 onChange={() => handleInputChange('documentUpload')}
                                             />
-                                        </div>
+                                        </div> */}
                                         <div className="mb-4">
                                             <label className="block text-sm font-medium mb-2" htmlFor="idDocument">Reporte de la policía:</label>
                                             <input
