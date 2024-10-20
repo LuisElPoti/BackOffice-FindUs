@@ -1,7 +1,7 @@
 "use client";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import {useState, useEffect } from "react";
+import {useState, useEffect, use } from "react";
 import {useRouter} from "next/navigation";
 import { Player } from '@lottiefiles/react-lottie-player';
 import OtpInput from "react-otp-input";
@@ -13,7 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 import {crearPublicacion} from "../../../services/publicacionServices";
 import { subirArchivo } from "../../../services/uploadFileServices";
 import { obtenerToken } from "../../../services/cookiesServices";
-
+import Mapa from '@/app/components/map'
 import Popup from "reactjs-popup";
 import 'reactjs-popup/dist/index.css';
 
@@ -24,6 +24,13 @@ export default function Publicaciones() {
   const [sendingPublicacionData, setSendingPublicacionData] = useState(false);
   const [apiResponse, setApiResponse] = useState(null);
   const [dataTiposDocumentos, setDataTiposDocumentos] = useState([]);
+  const [imageData, setImageData] = useState(null);
+  const [documentData, setDocumentData] = useState(null);
+  const [selectedPosition, setSelectedPosition] = useState(null);
+  const [mapPosition, setMapPosition] = useState({ lat: 0, lng: 0 });
+  const [mapZoom, setMapZoom] = useState(14); // Establece un zoom inicial. Puede ser un valor entre 0 y 21
+
+
 
   const [expandedSection, setExpandedSection] = useState(null);
   const [formFilled, setFormFilled] = useState({
@@ -36,12 +43,48 @@ export default function Publicaciones() {
     setExpandedSection(expandedSection === section ? null : section);
   };
 
-  const handleInputChange = (section) => {
-    setFormFilled((prevState) => ({
-      ...prevState,
-      [section]: true,
-    }));
+  const handleMapPositionChange = (position) => {
+    setMapPosition(position);
+    setSelectedPosition(position);
   };
+
+  const handleInputChange  = (section, event) => {
+    const files = event.target.files;
+  
+    const fileDataArray = [];
+  
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+  
+      reader.onload = () => {
+        const fullBase64 = reader.result; // Esto incluye el tipo MIME
+        const base64 = fullBase64.split(',')[1]; // Solo obtenemos el base64
+        const fileData = {
+          fileName: file.name,
+          mimeType: file.type,
+          base64: base64
+        };
+  
+        // Condicional basado en la sección (por ejemplo, documentUpload)
+        if (section === 'documentUpload') {
+          setDocumentData(fileData);
+          console.log('Documento cargado:', fileData);
+        } else if (section === 'photoUpload') {
+          console.log('Imagen cargada:', fileData);
+          setImageData(fileData);
+        }
+        fileDataArray.push(fileData);
+      };
+  
+      reader.onerror = (error) => {
+        console.error('Error leyendo el archivo:', error);
+      };
+  
+      // Leer el archivo como base64
+      reader.readAsDataURL(file);
+    });
+  };
+
 
   const showToast = async (promise, mensaje) => {
     return toast.promise(
@@ -117,7 +160,7 @@ export default function Publicaciones() {
       ubicacion_longitud: "",
     },
     validationSchema: validationSchema,
-    onSubmit: async (values) => {
+    onSubmit: (values) => {
       setSendingPublicacionData(true);
       try{
         values.edad = calcularEdad(values.fecha_nacimiento);
@@ -128,7 +171,7 @@ export default function Publicaciones() {
   
         console.log("Enviando datos: ", values);
   
-        const response = await crearPublicacion(values,obtenerToken()); // Espera la respuesta
+        const response = crearPublicacion(values,obtenerToken()); // Espera la respuesta
         setApiResponse(response); // Guarda la respuesta para manejar el estado
         
         if(response.status == 200){
@@ -136,11 +179,72 @@ export default function Publicaciones() {
           const idPublicacion = response.data.idpublicacion;
 
           // Subir archivos
+          if(imageData){
+            const fecha = new Date();
+            const fechaString = fecha.toISOString().split("T")[0];
+            const nombreFoto = imageData.fileName.split(".")[0] + "." + fechaString + "." + imageData.fileName.split(".")[1];
+            console.log("Nombre de la foto: ", nombreFoto);
+
+            const uploadData = {
+                idpublicacion: idPublicacion,
+                base64Image: imageData?.base64,
+                fileName: imageData.fileName,
+                mimeType: imageData?.mimeType,
+            }
+            console.log("Datos de la imagen: ", "fileName:", uploadData.fileName, "mimeType:", uploadData.mimeType, "idPublicacion:", uploadData.idpublicacion);
+
+            // Subir la imagen
+            const uploadResponse = subirArchivo(uploadData);
+            if(uploadResponse.status == 200){
+              console.log("Imagen subida correctamente: ", uploadResponse.data);
+            } else {
+                console.log("Error al subir la imagen: ", uploadResponse);
+            }
+          }
+
+          if(documentData){
+            const fecha = new Date();
+            const fechaString = fecha.toISOString().split("T")[0];
+            const nombreDocumento = documentData.fileName.split(".")[0] + "." + fechaString + "." + documentData.fileName.split(".")[1];
+            console.log("Nombre del documento: ", nombreDocumento);
+
+            const uploadData = {
+                idpublicacion: idPublicacion,
+                base64File: documentData?.base64,
+                fileName: documentData.fileName,
+                mimeType: documentData?.mimeType,
+            }
+            console.log("Datos del documento: ", "fileName:", uploadData.fileName, "mimeType:", uploadData.mimeType, "idPublicacion:", uploadData.idpublicacion);
+
+            // Subir el documento
+            const uploadResponse = subirArchivo(uploadData);
+            if(uploadResponse.status == 200){
+              console.log("Documento subido correctamente: ", uploadResponse.data);
+            } else {
+                console.log("Error al subir el documento: ", uploadResponse);
+            }
+          }          
         }
         
+      } catch (error) {
+        console.log("Error al crear la publicación: ", error);
+        setApiResponse(error);
       }
     },
   });
+
+  useEffect(() => {
+    console.log("Respuesta de la petición:", apiResponse);
+    if(apiResponse?.status == 200){
+        toast.success("Publicación creada correctamente", {position: "top-center",autoClose: 2000,className: "w-auto"});
+        setTimeout(() => {
+            router.push("/publicaciones");
+        }, 5000);
+    } else {
+        toast.error("Error al crear la publicación", {position: "top-center",autoClose: 5000, className: "w-auto"});
+    }
+    setSendingPublicacionData(false);
+    }, [apiResponse]);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-colorResumen">
@@ -172,6 +276,8 @@ export default function Publicaciones() {
           contentStyle={{
             padding: "0px",
             borderRadius: "8px",
+            maxHeight: "90vh",
+            overflowY: "auto",
           }}
         >
           <div className="p-8 bg-blueBackground rounded-md">
@@ -179,7 +285,7 @@ export default function Publicaciones() {
               Crear publicación de persona desaparecida
             </h2>
 
-            <form>
+            <form onSubmit={formik.handleSubmit}>
               {/* Información Personal */}
               <div className="mb-4">
                 <button
@@ -216,16 +322,53 @@ export default function Publicaciones() {
                         className="block text-sm font-medium mb-2"
                         htmlFor="name"
                       >
-                        Nombre desaparecido:
+                        Nombre completo:
                       </label>
                       <input
                         type="text"
-                        id="name"
+                        id="nombre_desaparecido"
+                        name="nombre_desaparecido"
                         className="w-full px-3 py-2 border border-gray-300 rounded"
-                        onChange={() => handleInputChange("personalInfo")}
+                        onChange={formik.handleChange}
+                        value={formik.values.nombre_desaparecido}
                       />
                     </div>
-
+                    <div className="mb-4">
+                      <label
+                        className="block text-sm font-medium mb-2"
+                        htmlFor="idNumber"
+                      >
+                        Tipo de Documento de identidad:
+                      </label>
+                      {/* <input
+                                            type="text"
+                                            id="idNumber"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            onChange={() => handleInputChange('personalInfo')}
+                                        /> */}
+                      <select
+                        className="w-full px-3 py-3 rounded font-medium text-gray-500 border border-gray-300 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                        type="text"
+                        id="id_tipo_documento"
+                        name="id_tipo_documento"
+                        onChange={formik.handleChange}
+                        value={formik.values.id_tipo_documento}
+                      >
+                        <option
+                          value=""
+                          label="Selecciona un tipo de documento"
+                        ></option>
+                        {dataTiposDocumentos.map((item) => (
+                          <option
+                            key={item.id}
+                            value={item.id}
+                            label={item.nombretipodocumento}
+                          ></option>
+                        ))}
+                        {/* <option value="1" label="Cédula"></option>
+                                            <option value="2" label="Pasaporte"></option> */}
+                      </select>
+                    </div>
                     <div className="mb-4">
                       <label
                         className="block text-sm font-medium mb-2"
@@ -235,9 +378,11 @@ export default function Publicaciones() {
                       </label>
                       <input
                         type="text"
-                        id="idNumber"
+                        id="documento_desaparecido"
+                        name="documento_desaparecido"
                         className="w-full px-3 py-2 border border-gray-300 rounded"
-                        onChange={() => handleInputChange("personalInfo")}
+                        onChange={formik.handleChange}
+                        value={formik.values.documento_desaparecido}
                       />
                     </div>
                     <div className="mb-4">
@@ -249,9 +394,11 @@ export default function Publicaciones() {
                       </label>
                       <input
                         type="date"
-                        id="birthDate"
+                        id="fecha_nacimiento"
+                        name="fecha_nacimiento"
                         className="w-full px-3 py-2 border border-gray-300 rounded"
-                        onChange={() => handleInputChange("personalInfo")}
+                        onChange={formik.handleChange}
+                        value={formik.values.fecha_nacimiento}
                       />
                     </div>
                     <div className="mb-4">
@@ -263,9 +410,11 @@ export default function Publicaciones() {
                       </label>
                       <input
                         type="date"
-                        id="disappearanceDate"
+                        id="fecha_desaparicion"
+                        name="fecha_desaparicion"
                         className="w-full px-3 py-2 border border-gray-300 rounded"
-                        onChange={() => handleInputChange("personalInfo")}
+                        value={formik.values.fecha_desaparicion}
+                        onChange={formik.handleChange}
                       />
                     </div>
                   </div>
@@ -311,12 +460,12 @@ export default function Publicaciones() {
                         Descripción física:
                       </label>
                       <textarea
-                        id="description"
+                        id="descripcion_desaparecido"
+                        name="descripcion_desaparecido"
                         className="w-full px-3 py-2 border border-gray-300 rounded"
-                        rows="4"
-                        onChange={() =>
-                          handleInputChange("disappearanceDetails")
-                        }
+                        rows="2"
+                        value={formik.values.descripcion_desaparecido}
+                        onChange={formik.handleChange}
                       />
                     </div>
                     <div className="mb-4">
@@ -324,15 +473,48 @@ export default function Publicaciones() {
                         className="block text-sm font-medium mb-2"
                         htmlFor="lastSight"
                       >
-                        Detalles del último avistamiento:
+                        Información de Contacto:
                       </label>
                       <textarea
-                        id="lastSight"
+                        id="contacto"
+                        name="contacto"
                         className="w-full px-3 py-2 border border-gray-300 rounded"
-                        rows="4"
-                        onChange={() =>
-                          handleInputChange("disappearanceDetails")
-                        }
+                        rows="2"
+                        value={formik.values.contacto}
+                        onChange={formik.handleChange}
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label
+                        className="block text-sm font-medium mb-2"
+                        htmlFor="lastSight"
+                      >
+                        Relación con el Desaparecido:
+                      </label>
+                      <input
+                        id="relacion_desaparecido"
+                        name="relacion_desaparecido"
+                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                        value={formik.values.relacion_desaparecido}
+                        onChange={formik.handleChange}
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label
+                        className="block text-sm font-medium mb-2"
+                        htmlFor="lastSight"
+                      >
+                        Ubicacion de desaparición:
+                      </label>
+                      <Mapa
+                        setFieldValue={formik.setFieldValue}
+                        lat_value={selectedPosition?.lat}
+                        long_value={selectedPosition?.lng}
+                        lat_name={"ubicacion_latitud"}
+                        long_name={"ubicacion_longitud"}
+                        initialPosition={mapPosition}
+                        initialZoom={mapZoom}
+                        onPositionChange={handleMapPositionChange}
                       />
                     </div>
                   </div>
@@ -382,23 +564,12 @@ export default function Publicaciones() {
                         id="photoUpload"
                         className="w-full px-3 py-2 border border-gray-300 rounded"
                         multiple
-                        onChange={() => handleInputChange("documentUpload")}
+                        onChange={(event) =>
+                          handleInputChange("photoUpload", event)
+                        }
                       />
                     </div>
-                    <div className="mb-4">
-                      <label
-                        className="block text-sm font-medium mb-2"
-                        htmlFor="policeReport"
-                      >
-                        Documento de identidad:
-                      </label>
-                      <input
-                        type="file"
-                        id="policeReport"
-                        className="w-full px-3 py-2 border border-gray-300 rounded"
-                        onChange={() => handleInputChange("documentUpload")}
-                      />
-                    </div>
+
                     <div className="mb-4">
                       <label
                         className="block text-sm font-medium mb-2"
@@ -410,7 +581,10 @@ export default function Publicaciones() {
                         type="file"
                         id="idDocument"
                         className="w-full px-3 py-2 border border-gray-300 rounded"
-                        onChange={() => handleInputChange("documentUpload")}
+                        onChange={(event) =>
+                          handleInputChange("documentUpload", event)
+                        }
+                        value={formik.values.idDocument}
                       />
                     </div>
                   </div>
@@ -419,7 +593,9 @@ export default function Publicaciones() {
 
               <div className="flex justify-end">
                 <button
-                  type="button"
+                  type="submit"
+                  disabled={sendingPublicacionData || !formik.isValid}
+                  style={{ backgroundColor: sendingPublicacionData || !formik.isValid ? "#B0B0B0" : "#3E86B9", }}
                   className="bg-blueBoton hover:bg-blueOscuro text-white font-bold py-2 px-4 rounded"
                 >
                   Enviar
