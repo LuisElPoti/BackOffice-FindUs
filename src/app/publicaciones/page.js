@@ -1,22 +1,25 @@
 "use client";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import {useState, useEffect, use } from "react";
-import {useRouter} from "next/navigation";
-import { Player } from '@lottiefiles/react-lottie-player';
+import { useState, useEffect, use } from "react";
+import { useRouter } from "next/navigation";
+import { Player } from "@lottiefiles/react-lottie-player";
 import OtpInput from "react-otp-input";
-import { obtenerTiposDocumentos } from "../../../services/catalogoServices"
-import {registrarUsuario,formato_nombres,confirmarCorreo} from "../../../services/userService";
-import { FaEye, FaEyeSlash} from "react-icons/fa6";
-import { toast,ToastContainer } from "react-toastify";
+import { obtenerTiposDocumentos } from "../../../services/catalogoServices";
+import {
+  registrarUsuario,
+  formato_nombres,
+  confirmarCorreo,
+} from "../../../services/userService";
+import { FaEye, FaEyeSlash } from "react-icons/fa6";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {crearPublicacion} from "../../../services/publicacionServices";
+import { crearPublicacion } from "../../../services/publicacionServices";
 import { subirArchivo } from "../../../services/uploadFileServices";
 import { obtenerToken } from "../../../services/cookiesServices";
-import Mapa from '@/app/components/map'
+import Mapa from "@/app/components/map";
 import Popup from "reactjs-popup";
-import 'reactjs-popup/dist/index.css';
-
+import "reactjs-popup/dist/index.css";
 
 export default function Publicaciones() {
   const router = useRouter();
@@ -29,8 +32,6 @@ export default function Publicaciones() {
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [mapPosition, setMapPosition] = useState({ lat: 0, lng: 0 });
   const [mapZoom, setMapZoom] = useState(14); // Establece un zoom inicial. Puede ser un valor entre 0 y 21
-
-
 
   const [expandedSection, setExpandedSection] = useState(null);
   const [formFilled, setFormFilled] = useState({
@@ -48,43 +49,42 @@ export default function Publicaciones() {
     setSelectedPosition(position);
   };
 
-  const handleInputChange  = (section, event) => {
+  const handleInputChange = (section, event) => {
     const files = event.target.files;
-  
+
     const fileDataArray = [];
-  
-    Array.from(files).forEach(file => {
+
+    Array.from(files).forEach((file) => {
       const reader = new FileReader();
-  
+
       reader.onload = () => {
         const fullBase64 = reader.result; // Esto incluye el tipo MIME
-        const base64 = fullBase64.split(',')[1]; // Solo obtenemos el base64
+        const base64 = fullBase64.split(",")[1]; // Solo obtenemos el base64
         const fileData = {
           fileName: file.name,
           mimeType: file.type,
-          base64: base64
+          base64: base64,
         };
-  
+
         // Condicional basado en la sección (por ejemplo, documentUpload)
-        if (section === 'documentUpload') {
+        if (section === "documentUpload") {
           setDocumentData(fileData);
-          console.log('Documento cargado:', fileData);
-        } else if (section === 'photoUpload') {
-          console.log('Imagen cargada:', fileData);
+          console.log("Documento cargado:", fileData);
+        } else if (section === "photoUpload") {
+          console.log("Imagen cargada:", fileData);
           setImageData(fileData);
         }
         fileDataArray.push(fileData);
       };
-  
+
       reader.onerror = (error) => {
-        console.error('Error leyendo el archivo:', error);
+        console.error("Error leyendo el archivo:", error);
       };
-  
+
       // Leer el archivo como base64
       reader.readAsDataURL(file);
     });
   };
-
 
   const showToast = async (promise, mensaje) => {
     return toast.promise(
@@ -123,11 +123,11 @@ export default function Publicaciones() {
     // console.log(obtenerToken());
     formik.validateForm();
     obtenerTiposDocumentos().then((response) => {
-        // console.log("Respuesta de la petición:", response.data);
-        if(response.status == 200){
-            setDataTiposDocumentos(response.data);
-        }
-  });
+      // console.log("Respuesta de la petición:", response.data);
+      if (response.status == 200) {
+        setDataTiposDocumentos(response.data);
+      }
+    });
   }, []);
 
   const validationSchema = Yup.object().shape({
@@ -160,72 +160,122 @@ export default function Publicaciones() {
       ubicacion_longitud: "",
     },
     validationSchema: validationSchema,
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
       setSendingPublicacionData(true);
-      try{
+      try {
+        console.log("Fecha de nacimiento: ", values.fecha_nacimiento);
+        values.fecha_nacimiento = new Date(values.fecha_nacimiento);
+        values.fecha_desaparicion = new Date(values.fecha_desaparicion);
         values.edad = calcularEdad(values.fecha_nacimiento);
         values.id_tipo_documento = parseInt(values.id_tipo_documento);
 
         values.ubicacion_latitud = values.ubicacion_latitud.toString();
         values.ubicacion_longitud = values.ubicacion_longitud.toString();
-  
+
         console.log("Enviando datos: ", values);
-  
-        const response = crearPublicacion(values,obtenerToken()); // Espera la respuesta
+
+        console.log("Token: ", obtenerToken());
+
+        const response = await crearPublicacion(values, obtenerToken()); // Espera la respuesta
         setApiResponse(response); // Guarda la respuesta para manejar el estado
-        
-        if(response.status == 200){
+        console.log("Respuesta de la petición:", response);
+        if (response.status == 200) {
+          toast.success("Publicación creada correctamente", {
+            position: "top-center",
+            autoClose: 2000,
+            className: "w-auto",
+          });
+          setTimeout(() => {
+            router.push("/");
+          }, 5000);
           console.log("Publicación creada correctamente: ", response.data);
           const idPublicacion = response.data.idpublicacion;
 
           // Subir archivos
-          if(imageData){
+          if (imageData) {
             const fecha = new Date();
             const fechaString = fecha.toISOString().split("T")[0];
-            const nombreFoto = imageData.fileName.split(".")[0] + "." + fechaString + "." + imageData.fileName.split(".")[1];
-            console.log("Nombre de la foto: ", nombreFoto);
+            const nombreFoto =
+              imageData.fileName.split(".")[0] +
+              fechaString +
+              "." +
+              imageData.fileName.split(".")[1];
+            const sanitizedFileName = nombreFoto.replace(/[\s/]/g, "_"); // Reemplaza espacios y barras
+            console.log("Nombre de la foto: ", sanitizedFileName);
 
             const uploadData = {
-                idpublicacion: idPublicacion,
-                base64Image: imageData?.base64,
-                fileName: imageData.fileName,
-                mimeType: imageData?.mimeType,
-            }
-            console.log("Datos de la imagen: ", "fileName:", uploadData.fileName, "mimeType:", uploadData.mimeType, "idPublicacion:", uploadData.idpublicacion);
+              idpublicacion: idPublicacion,
+              base64Image: imageData?.base64,
+              fileName: sanitizedFileName,
+              mimeType: imageData?.mimeType,
+            };
+            console.log(
+              "Datos de la imagen: ",
+              "fileName:",
+              uploadData.fileName,
+              "mimeType:",
+              uploadData.mimeType,
+              "idPublicacion:",
+              uploadData.idpublicacion
+            );
 
             // Subir la imagen
-            const uploadResponse = subirArchivo(uploadData);
-            if(uploadResponse.status == 200){
+            const uploadResponse = await subirArchivo(uploadData);
+            if (uploadResponse.status == 200) {
               console.log("Imagen subida correctamente: ", uploadResponse.data);
             } else {
-                console.log("Error al subir la imagen: ", uploadResponse);
+              console.log("Error al subir la imagen: ", uploadResponse);
             }
           }
 
-          if(documentData){
+          if (documentData) {
             const fecha = new Date();
             const fechaString = fecha.toISOString().split("T")[0];
-            const nombreDocumento = documentData.fileName.split(".")[0] + "." + fechaString + "." + documentData.fileName.split(".")[1];
-            console.log("Nombre del documento: ", nombreDocumento);
+            const nombreDocumento =
+              documentData.fileName.split(".")[0] +
+              fechaString +
+              "." +
+              documentData.fileName.split(".")[1];
+            const sanitizedFileName = nombreDocumento.replace(/[\s/]/g, "_"); // Reemplaza espacios y barras
+
+            console.log("Nombre del documento: ", sanitizedFileName);
 
             const uploadData = {
-                idpublicacion: idPublicacion,
-                base64File: documentData?.base64,
-                fileName: documentData.fileName,
-                mimeType: documentData?.mimeType,
-            }
-            console.log("Datos del documento: ", "fileName:", uploadData.fileName, "mimeType:", uploadData.mimeType, "idPublicacion:", uploadData.idpublicacion);
+              idpublicacion: idPublicacion,
+              base64File: documentData?.base64,
+              fileName: sanitizedFileName,
+              mimeType: documentData?.mimeType,
+            };
+            console.log(
+              "Datos del documento: ",
+              "fileName:",
+              uploadData.fileName,
+              "mimeType:",
+              uploadData.mimeType,
+              "idPublicacion:",
+              uploadData.idpublicacion
+            );
 
             // Subir el documento
-            const uploadResponse = subirArchivo(uploadData);
-            if(uploadResponse.status == 200){
-              console.log("Documento subido correctamente: ", uploadResponse.data);
+            const uploadResponse = await subirArchivo(uploadData);
+            if (uploadResponse.status == 200) {
+              console.log(
+                "Documento subido correctamente: ",
+                uploadResponse.data
+              );
             } else {
-                console.log("Error al subir el documento: ", uploadResponse);
+              console.log("Error al subir el documento: ", uploadResponse);
             }
-          }          
+          }
+        } else {
+            toast.error("Error al crear la publicación", {
+                position: "top-center",
+                autoClose: 5000,
+                className: "w-auto",
+            });
         }
-        
+        setSendingPublicacionData(false);
+
       } catch (error) {
         console.log("Error al crear la publicación: ", error);
         setApiResponse(error);
@@ -233,18 +283,26 @@ export default function Publicaciones() {
     },
   });
 
-  useEffect(() => {
-    console.log("Respuesta de la petición:", apiResponse);
-    if(apiResponse?.status == 200){
-        toast.success("Publicación creada correctamente", {position: "top-center",autoClose: 2000,className: "w-auto"});
-        setTimeout(() => {
-            router.push("/publicaciones");
-        }, 5000);
-    } else {
-        toast.error("Error al crear la publicación", {position: "top-center",autoClose: 5000, className: "w-auto"});
-    }
-    setSendingPublicacionData(false);
-    }, [apiResponse]);
+//   useEffect(() => {
+//     console.log("Respuesta de la petición:", apiResponse);
+//     if (apiResponse?.status == 200) {
+//       toast.success("Publicación creada correctamente", {
+//         position: "top-center",
+//         autoClose: 2000,
+//         className: "w-auto",
+//       });
+//       setTimeout(() => {
+//         router.push("/publicaciones");
+//       }, 5000);
+//     } else {
+//       toast.error("Error al crear la publicación", {
+//         position: "top-center",
+//         autoClose: 5000,
+//         className: "w-auto",
+//       });
+//     }
+//     setSendingPublicacionData(false);
+//   }, [apiResponse]);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-colorResumen">
@@ -262,7 +320,7 @@ export default function Publicaciones() {
             className="w-[38px] h-[38px]"
           />
         </button>
-
+        <ToastContainer />
         <Popup
           trigger={
             <button className="text-white font-medium bg-blueBoton hover:bg-blueOscuro rounded-lg p-2 flex items-center justify-center h-[40px] transition-colors duration-300">
@@ -383,6 +441,22 @@ export default function Publicaciones() {
                         className="w-full px-3 py-2 border border-gray-300 rounded"
                         onChange={formik.handleChange}
                         value={formik.values.documento_desaparecido}
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label
+                        className="block text-sm font-medium mb-2"
+                        htmlFor="phone"
+                      >
+                        Teléfono de contacto:
+                      </label>
+                      <input
+                        type="text"
+                        id="telefono"
+                        name="telefono"
+                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                        onChange={formik.handleChange}
+                        value={formik.values.telefono}
                       />
                     </div>
                     <div className="mb-4">
@@ -561,6 +635,7 @@ export default function Publicaciones() {
                       </label>
                       <input
                         type="file"
+                        accept="image/*"
                         id="photoUpload"
                         className="w-full px-3 py-2 border border-gray-300 rounded"
                         multiple
@@ -584,7 +659,6 @@ export default function Publicaciones() {
                         onChange={(event) =>
                           handleInputChange("documentUpload", event)
                         }
-                        value={formik.values.idDocument}
                       />
                     </div>
                   </div>
@@ -595,7 +669,12 @@ export default function Publicaciones() {
                 <button
                   type="submit"
                   disabled={sendingPublicacionData || !formik.isValid}
-                  style={{ backgroundColor: sendingPublicacionData || !formik.isValid ? "#B0B0B0" : "#3E86B9", }}
+                  style={{
+                    backgroundColor:
+                      sendingPublicacionData || !formik.isValid
+                        ? "#B0B0B0"
+                        : "#3E86B9",
+                  }}
                   className="bg-blueBoton hover:bg-blueOscuro text-white font-bold py-2 px-4 rounded"
                 >
                   Enviar
