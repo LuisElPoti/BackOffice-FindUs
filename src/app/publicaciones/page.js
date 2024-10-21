@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import Popup from "reactjs-popup";
 import 'reactjs-popup/dist/index.css';
-
+import MyTable from "../components/tablePublicaciones";
 
 export default function Publicaciones() {
     const [expandedSection, setExpandedSection] = useState(null);
@@ -220,12 +220,9 @@ export default function Publicaciones() {
                                 )}
                             </div>
 
-                            <div className="flex justify-end">
-                                <button
-                                    type="button"
-                                    className="bg-blueBoton hover:bg-blueOscuro text-white font-bold py-2 px-4 rounded"
-                                >
-                                    Enviar
+                            <div className="mt-8 flex justify-end">
+                                <button className="text-white bg-blueBoton hover:bg-blueOscuro rounded-lg p-2">
+                                    Publicar
                                 </button>
                             </div>
                         </form>
@@ -233,8 +230,8 @@ export default function Publicaciones() {
                 </Popup>
             </div>
 
-            <div className="relative z-10 bg-grayBackground -mt-36 rounded-tl-3xl rounded-tr-3xl p-10 overflow-y-scroll">
-
+            <div className="flex-grow relative">
+                <MyTable />
             </div>
         </div>
     );
