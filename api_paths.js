@@ -14,6 +14,10 @@ const apiRoutes = {
 
     //Rutas Tipo de Documento
     obtenerTiposDocumentos: () => `${API_BASE_URL}/tipo_documento/obtenerTipoDocumento`,
+    //Rutas Categoria de Material
+    obtenerCategoriaMaterial: () => `${API_BASE_URL}/categoria_material/obtenerCategoriaMaterial`,
+    //Rutas Recurso Educativo
+    crearRecursoEducativo: () => `${API_BASE_URL}/crear_recursos_educativos`,
     // Otras rutas
     // ...
 };
