@@ -112,7 +112,7 @@ export default function Material() {
                                 >
                                     <span>
                                         <img
-                                            src={formFilled.documentUpload ? '/assets/on.png' : '/assets/3.png'}
+                                            src={formFilled.documentUpload ? '/assets/on.png' : '/assets/2.png'}
                                             alt="icon"
                                             className="inline-block w-6 h-6 mr-2"
                                         />
