@@ -18,16 +18,10 @@ const rows = [
     createData(1105983, 'Cristian Castro Garcia', '14/10/2024', 'ACTIVO'),
     createData(1105984, 'Dario Contreras Ovalle', '24/10/2024', 'INACTIVO'),
     createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'ACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'ACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', '03/11/2024', 'INACTIVO'),    
+    // Add more rows if needed
 ];
 
-export default function MyTable() {
+export default function MyTable({ onRowClick }) {
     return (
         <div
             style={{
@@ -38,7 +32,7 @@ export default function MyTable() {
                 overflowY: 'auto',
                 margin: 'auto',
                 position: 'absolute',
-                top: '-290px', // Mueve la tabla hacia arriba para que quede encima del greenBackground
+                top: '-290px',
                 left: '50%',
                 transform: 'translateX(-50%)',
             }}
@@ -67,7 +61,8 @@ export default function MyTable() {
                         {rows.map((row) => (
                             <TableRow
                                 key={row.ID}
-                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                sx={{ '&:last-child td, &:last-child th': { border: 0 }, cursor: 'pointer' }}
+                                onClick={() => onRowClick(row)} // Trigger onRowClick when row is clicked
                             >
                                 <TableCell align="left">{row.ID}</TableCell>
                                 <TableCell align="left">{row.nombre}</TableCell>
