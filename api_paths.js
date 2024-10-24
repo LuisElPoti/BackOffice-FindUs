@@ -14,6 +14,21 @@ const apiRoutes = {
 
     //Rutas Tipo de Documento
     obtenerTiposDocumentos: () => `${API_BASE_URL}/tipo_documento/obtenerTipoDocumento`,
+    //Rutas Categoria de Material
+    obtenerCategoriaMaterial: () => `${API_BASE_URL}/categoria_material/obtenerCategoriaMaterial`,
+    //Rutas Recurso Educativo
+    crearRecursoEducativo: () => `${API_BASE_URL}/crear_recursos_educativos`,
+
+    //Rutas de Publicacion
+    obtenerPublicaciones: () => `${API_BASE_URL}/desaparecido/obtenerDesaparecidos`,
+    obtenerPublicacion: (id) => `${API_BASE_URL}/desaparecido/obtenerDesaparecido${id}`,
+    crearPublicacion: () => `${API_BASE_URL}/desaparecido/crearDesaparecido`,
+    actualizarPublicacion: (id) => `${API_BASE_URL}/desaparecido/updateDesaparecido/${id}`,
+    eliminarPublicacion: (id) => `${API_BASE_URL}/desaparecido/deleteDesaparecido/${id}`,
+
+    // Fotos publicacion
+    subirArchivo: () => `${API_BASE_URL}/fotospublicacion/crearFotoPublicacion`,
+    
     // Otras rutas
     // ...
 };
