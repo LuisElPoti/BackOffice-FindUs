@@ -19,7 +19,9 @@ import { subirArchivo } from "../../../services/uploadFileServices";
 import { obtenerToken } from "../../../services/cookiesServices";
 import Mapa from "@/app/components/map";
 import Popup from "reactjs-popup";
-import "reactjs-popup/dist/index.css";
+import 'reactjs-popup/dist/index.css';
+import MyTable from "../components/tablePublicaciones";
+import { FaEdit, FaCheck, FaTimes } from 'react-icons/fa'; // Import icons for edit, check, and cancel
 
 export default function Publicaciones() {
   const router = useRouter();
@@ -32,7 +34,46 @@ export default function Publicaciones() {
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [mapPosition, setMapPosition] = useState({ lat: 0, lng: 0 });
   const [mapZoom, setMapZoom] = useState(14); // Establece un zoom inicial. Puede ser un valor entre 0 y 21
+  
+  
+  //AQUI LO PRIMERO DE ROSANNA
+   const [selectedPerson, setSelectedPerson] = useState(null); // State to hold the selected person info
+    const [isEditing, setIsEditing] = useState({}); // To track editable state for each field
 
+    const toggleSection = (section) => {
+        setExpandedSection(expandedSection === section ? null : section);
+    };
+
+    const handleInputChange = (section) => {
+        setFormFilled((prevState) => ({
+            ...prevState,
+            [section]: true,
+        }));
+    };
+
+    const handleRowClick = (personData) => {
+        setSelectedPerson(personData); // Set the clicked person's data
+    };
+
+    const closePopup = () => {
+        setSelectedPerson(null); // Clear the popup when closed
+    };
+
+    const handleEditToggle = (field) => {
+        setIsEditing((prevState) => ({
+            ...prevState,
+            [field]: !prevState[field], // Toggle the edit mode for the field
+        }));
+    };
+
+    const handleFieldChange = (field, value) => {
+        setSelectedPerson((prevState) => ({
+            ...prevState,
+            [field]: value, // Update the selected person's data
+        }));
+    };
+    //AQUI TERMINA LO DE ROSANNA
+  
   const [expandedSection, setExpandedSection] = useState(null);
   const [formFilled, setFormFilled] = useState({
     personalInfo: false,
@@ -255,7 +296,6 @@ export default function Publicaciones() {
               "idPublicacion:",
               uploadData.idpublicacion
             );
-
             // Subir el documento
             const uploadResponse = await subirArchivo(uploadData);
             if (uploadResponse.status == 200) {
@@ -644,7 +684,6 @@ export default function Publicaciones() {
                         }
                       />
                     </div>
-
                     <div className="mb-4">
                       <label
                         className="block text-sm font-medium mb-2"
@@ -686,6 +725,155 @@ export default function Publicaciones() {
       </div>
 
       <div className="relative z-10 bg-grayBackground -mt-36 rounded-tl-3xl rounded-tr-3xl p-10 overflow-y-scroll"></div>
+
+       <div className="flex-grow relative">
+                {/* Pass the handleRowClick to MyTable to trigger the popup */}
+                <MyTable onRowClick={handleRowClick} />
+            </div>
+
+            {/* Popup to show when a row is clicked */}
+            {selectedPerson && (
+                <Popup
+                    open={true}
+                    closeOnDocumentClick
+                    onClose={closePopup}
+                    contentStyle={{
+                        padding: '20px',
+                        borderRadius: '12px',
+                        width: '700px', // Wider for improved UI
+                        maxWidth: '95%',
+                        backgroundColor: '#f9f9f9',
+                        boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)', // Enhanced shadow for depth
+                    }}
+                >
+                    <div className="popup-content space-y-6">
+                        <div className="flex justify-between items-center border-b pb-4">
+                            <h2 className="text-2xl font-bold text-gray-800">Información de la persona</h2>
+                            <button onClick={closePopup} className="text-gray-500 hover:text-red-500 transition-colors duration-200">
+                                <FaTimes />
+                            </button>
+                        </div>
+
+                        <img
+                            src={selectedPerson.image || "/assets/persona-desaparecida.jpeg"} // Use the local fallback image
+                            alt="Desaparecido"
+                            className="w-full h-auto mb-4 rounded-lg shadow-sm"
+                        />
+
+                        {/* Editable Fields */}
+                        <div className="space-y-6">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <strong className="text-gray-700">Nombre completo:</strong> 
+                                    {isEditing.nombre ? (
+                                        <input
+                                            type="text"
+                                            value={selectedPerson.nombre}
+                                            onChange={(e) => handleFieldChange('nombre', e.target.value)}
+                                            className="ml-4 border-b border-gray-400 focus:border-blue-500 transition-all duration-200"
+                                        />
+                                    ) : (
+                                        <span className="ml-4">{selectedPerson.nombre}</span>
+                                    )}
+                                </div>
+                                <FaEdit
+                                    className="text-gray-500 cursor-pointer hover:text-blue-500 transition-colors duration-200"
+                                    onClick={() => handleEditToggle('nombre')}
+                                />
+                            </div>
+
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <strong className="text-gray-700">Fecha de desaparición:</strong> 
+                                    {isEditing.fechaDesaparicion ? (
+                                        <input
+                                            type="text"
+                                            value={selectedPerson.fechaDesaparicion}
+                                            onChange={(e) => handleFieldChange('fechaDesaparicion', e.target.value)}
+                                            className="ml-4 border-b border-gray-400 focus:border-blue-500 transition-all duration-200"
+                                        />
+                                    ) : (
+                                        <span className="ml-4">{selectedPerson.fechaDesaparicion}</span>
+                                    )}
+                                </div>
+                                <FaEdit
+                                    className="text-gray-500 cursor-pointer hover:text-blue-500 transition-colors duration-200"
+                                    onClick={() => handleEditToggle('fechaDesaparicion')}
+                                />
+                            </div>
+
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <strong className="text-gray-700">Último avistamiento:</strong> 
+                                    {isEditing.ultimoAvistamiento ? (
+                                        <input
+                                            type="text"
+                                            value={selectedPerson.ultimoAvistamiento || ''}
+                                            onChange={(e) => handleFieldChange('ultimoAvistamiento', e.target.value)}
+                                            className="ml-4 border-b border-gray-400 focus:border-blue-500 transition-all duration-200"
+                                        />
+                                    ) : (
+                                        <span className="ml-4">{selectedPerson.ultimoAvistamiento || 'N/A'}</span>
+                                    )}
+                                </div>
+                                <FaEdit
+                                    className="text-gray-500 cursor-pointer hover:text-blue-500 transition-colors duration-200"
+                                    onClick={() => handleEditToggle('ultimoAvistamiento')}
+                                />
+                            </div>
+
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <strong className="text-gray-700">Aspeto físico:</strong> 
+                                    {isEditing.aspectoFisico ? (
+                                        <input
+                                            type="text"
+                                            value={selectedPerson.aspectoFisico || ''}
+                                            onChange={(e) => handleFieldChange('aspectoFisico', e.target.value)}
+                                            className="ml-4 border-b border-gray-400 focus:border-blue-500 transition-all duration-200"
+                                        />
+                                    ) : (
+                                        <span className="ml-4">{selectedPerson.aspectoFisico || 'N/A'}</span>
+                                    )}
+                                </div>
+                                <FaEdit
+                                    className="text-gray-500 cursor-pointer hover:text-blue-500 transition-colors duration-200"
+                                    onClick={() => handleEditToggle('aspectoFisico')}
+                                />
+                            </div>
+
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <strong className="text-gray-700">Parentesco:</strong> 
+                                    {isEditing.parentesco ? (
+                                        <input
+                                            type="text"
+                                            value={selectedPerson.parentesco || ''}
+                                            onChange={(e) => handleFieldChange('parentesco', e.target.value)}
+                                            className="ml-4 border-b border-gray-400 focus:border-blue-500 transition-all duration-200"
+                                        />
+                                    ) : (
+                                        <span className="ml-4">{selectedPerson.parentesco || 'N/A'}</span>
+                                    )}
+                                </div>
+                                <FaEdit
+                                    className="text-gray-500 cursor-pointer hover:text-blue-500 transition-colors duration-200"
+                                    onClick={() => handleEditToggle('parentesco')}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                onClick={closePopup}
+                                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md shadow-sm font-medium transition-colors duration-200"
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </Popup>
+            )}
     </div>
   );
 }
