@@ -12,6 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 export default function Material() {
     const [expandedSection, setExpandedSection] = useState(null);
     const [sendingUserData, setSendingUserData] = useState(false);
+    const [openModal, setOpenModal] = useState(false);
     const [data, setData] = useState([]);
     const [formFilled, setFormFilled] = useState({
         personalInfo: false,
@@ -36,6 +37,7 @@ export default function Material() {
     };
 
     useEffect(() => {
+        formik.validateForm();
         obtenerCategoriaMaterial().then((response) => {
             if (response.status === 200) {
                 setData(response.data);
@@ -58,11 +60,9 @@ export default function Material() {
         idCategoriaMaterial: Yup.number()
           .required(""),
         nombre: Yup.string()
-          .required("El nombre del Material es requerido")
-          .matches(/^[a-zA-Z\s]+$/, "El apellido solo debe contener letras y espacios"),
+          .required("El nombre del Material es requerido"),
         descripcion: Yup.string()
-          .matches(/^[a-zA-Z\s]+$/, "La descripción solo debe contener letras y espacios")
-          .required("El teléfono es requerido"),
+          .required("La descripción es requerida"),
         fileName: Yup.string(),
         fileMimetype: Yup.string(),
         filebase64: Yup.string(),
@@ -78,19 +78,39 @@ export default function Material() {
           fileName: "",
           fileMimetype: "",
           filebase64: "",
+          urlmaterial: "",
         },
         validationSchema: validationSchema,
         onSubmit: (values) => {
-          console.log("Valores del formulario: ", values);
+            // console.log("Valores del formulario: ", values);
+            if(selectedCategory === 1 || selectedCategory === 3){
+                values.urlmaterial = "";
+                if(values.filebase64 === ""){
+                    toast.error("Debe subir un archivo", {position: "top-center",className: "w-auto"});
+                    return;
+                }
+            }else if(selectedCategory === 2 || selectedCategory === 4){
+                values.filebase64 = "";
+                values.fileName = "";
+                values.fileMimetype = "";
+                if(values.urlmaterial === ""){           
+                    toast.error("Debe ingresar una URL", {position: "top-center",className: "w-auto"});
+                    return;
+                }
+            }
+            console.log("Valores del formulario: ", values);
           setSendingUserData(true);
           showToast(crearRecursoEducativo(values),"Creando Recurso Educativo...").then((response) => {
             // console.log("Respuesta de la peticion: ", response.data);
             if(response.status == 200){
+                toast.success("Material educativo creado correctamente", {position: "top-center",className: "w-auto"});
+                setSendingUserData(false);
                 setFormFilled({
                     personalInfo: false,
                     documentUpload: false,
                 });
-                formik.resetForm();
+                handlePopupClose();
+                // formik.resetForm();
             }
           });
         }
@@ -121,6 +141,13 @@ export default function Material() {
         });
     };
     
+    const handlePopupClose = () => { 
+        setExpandedSection(null);
+        setOpenModal(false);
+        formik.resetForm();
+        //Buscar el input de documentios y limpiarlo
+        // document.getElementById("fileUpload").value = "";
+    };
 
     const renderInputForCategory = () => {
         if (selectedCategory === 1 || selectedCategory === 3) {
@@ -132,6 +159,7 @@ export default function Material() {
                     <input
                         type="file"
                         id="fileUpload"
+                        name="fileUpload"
                         className="w-full px-3 py-2 border border-gray-300 rounded"
                         onChange={(e) => handleFileUpload(e)}
                     />
@@ -167,14 +195,14 @@ export default function Material() {
             <div className="absolute top-8 right-8 flex items-center">
                 <Popup
                     trigger={
-                        <button className="text-white font-medium bg-blueBoton hover:bg-blueOscuro rounded-lg p-2 flex items-center justify-center h-[40px] transition-colors duration-300">
+                        <button className="text-white font-medium bg-blueBoton hover:bg-blueOscuro rounded-lg p-2 flex items-center justify-center h-[40px] transition-colors duration-300" onClick={()=> setOpenModal(true)}>
                             Crear material +
                         </button>
                     }
                     position="right center"
-                    modal
+                    modal                    
                     closeOnDocumentClick
-                    onClose={() => setExpandedSection(null)}
+                    onClose={() => handlePopupClose()}
                     contentStyle={{ padding: '0px', borderRadius: '8px' }}
                 >
                     <div className="p-8 bg-blueBackground rounded-md">
@@ -252,7 +280,10 @@ export default function Material() {
                                 <button
                                     type="button"
                                     onClick={formik.handleSubmit}
-                                    className="bg-blueBoton hover:bg-blueOscuro text-white font-bold py-2 px-4 rounded"
+                                    // el botón se habilita solo si se han llenado todos los campos
+                                    disabled={!formik.isValid || sendingUserData}
+                                    style={{ backgroundColor: formik.isValid && !sendingUserData ? '#3e86b9' : '#C9C9C9' }}
+                                    className=" hover:bg-blueOscuro text-white font-bold py-2 px-4 rounded"
                                 >
                                     Enviar
                                 </button>
