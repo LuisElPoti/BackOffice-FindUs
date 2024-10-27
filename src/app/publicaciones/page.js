@@ -40,17 +40,6 @@ export default function Publicaciones() {
    const [selectedPerson, setSelectedPerson] = useState(null); // State to hold the selected person info
     const [isEditing, setIsEditing] = useState({}); // To track editable state for each field
 
-    const toggleSection = (section) => {
-        setExpandedSection(expandedSection === section ? null : section);
-    };
-
-    const handleInputChange = (section) => {
-        setFormFilled((prevState) => ({
-            ...prevState,
-            [section]: true,
-        }));
-    };
-
     const handleRowClick = (personData) => {
         setSelectedPerson(personData); // Set the clicked person's data
     };
