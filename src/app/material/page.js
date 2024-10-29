@@ -123,7 +123,7 @@ export default function Material() {
     
         formik.setFieldValue("fileName", file.name);       // Nombre del archivo
         formik.setFieldValue("fileMimetype", file.type);      // Tipo MIME
-        const fileBase64 = await convertToBase64(file); // Convertir el archivo a base64
+        const fileBase64 = (await convertToBase64(file)).split(',')[1]; // Convertir el archivo a base64
         formik.setFieldValue("filebase64", fileBase64); // Base64
     
         console.log('Filename:', file.name);
@@ -133,10 +133,11 @@ export default function Material() {
     
     // Función para convertir archivo a base64
     const convertToBase64 = (file) => {
+        console.log('file:', file);
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result.split(',')[1]); // Tomar solo la parte base64
+            reader.onload = () => resolve(reader.result); // Tomar solo la parte base64
             reader.onerror = (error) => reject(error);
         });
     };
