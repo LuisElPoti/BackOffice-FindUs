@@ -20,8 +20,8 @@ import { obtenerToken } from "../../../services/cookiesServices";
 import Mapa from "@/app/components/map";
 import Popup from "reactjs-popup";
 import 'reactjs-popup/dist/index.css';
-import MyTable from "../components/tablePublicaciones";
 import { FaEdit, FaCheck, FaTimes } from 'react-icons/fa'; // Import icons for edit, check, and cancel
+import TablaPublicaciones from "../components/tablePublicaciones";
 
 export default function Publicaciones() {
   const router = useRouter();
@@ -312,6 +312,8 @@ export default function Publicaciones() {
     },
   });
 
+  
+
 //   useEffect(() => {
 //     console.log("Respuesta de la petición:", apiResponse);
 //     if (apiResponse?.status == 200) {
@@ -334,12 +336,12 @@ export default function Publicaciones() {
 //   }, [apiResponse]);
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-colorResumen">
-      <div className="h-[45%] bg-greenBackground relative">
+    <div className="flex flex-col h-screen overflow-hidden bg-50-50-vertical">
+      {/* <div className="h-[45%] bg-greenBackground relative"> */}
         <h2 className="text-xl text-letterColor font-bold ml-12 mt-8">
           Publicaciones
         </h2>
-      </div>
+      {/* </div> */}
 
       <div className="absolute top-8 right-8 flex items-center">
         <button className="text-white p-2 mr-4 flex items-center justify-center h-[40px]">
@@ -713,12 +715,16 @@ export default function Publicaciones() {
         </Popup>
       </div>
 
-      <div className="relative z-10 bg-grayBackground -mt-36 rounded-tl-3xl rounded-tr-3xl p-10 overflow-y-scroll"></div>
+      {/* <div className="relative z-10 bg-grayBackground -mt-36 rounded-tl-3xl rounded-tr-3xl p-10 overflow-y-scroll"></div> */}
 
-       <div className="flex-grow relative">
+       <div className="relative mt-[10vh]">
                 {/* Pass the handleRowClick to MyTable to trigger the popup */}
-                <MyTable onRowClick={handleRowClick} />
-            </div>
+                <TablaPublicaciones 
+                  headers={["ID Publicación","Nombre","Fecha Desaparición", "Fecha Publicación","Estatus",""]} 
+                  onRowClick={handleRowClick} 
+                  className={"flex m-auto top-0 left-0 right-0 max-h-[65vh]"}
+                />
+        </div>
 
             {/* Popup to show when a row is clicked */}
             {selectedPerson && (
@@ -863,6 +869,6 @@ export default function Publicaciones() {
                     </div>
                 </Popup>
             )}
-    </div>
+       </div>
   );
 }

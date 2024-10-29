@@ -10,6 +10,18 @@ export const obtenerPublicaciones = async () => {
     }
 }
 
+export const obtenerDesaparecidosTabla = async (page,limit, filtros) => {
+    try {
+        const response = await axios.get(`${apiRoutes.obtenerDesaparecidosTabla(page,limit)}?${filtros}`);
+        console.log("ASASASAsa")
+        console.log(response)
+        return response;
+    } catch (error) {
+        console.log(error);
+        return error.response;
+    }
+}
+
 export const obtenerPublicacion = async (id) => {
     try {
         const response = await axios.get(apiRoutes.obtenerPublicacion(id));
