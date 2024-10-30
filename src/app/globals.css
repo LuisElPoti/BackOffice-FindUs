@@ -1,3 +1,32 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.scrollbar-custom {
+    scrollbar-width: thin; /* Para Firefox */
+    scrollbar-color: rgba(0, 0, 0, 0.5) transparent; /* Ajusta el color para asegurar que sea visible */
+    scrollbar-arrow-color: transparent; /* Oculta las flechas */
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+    width: 8px; /* Ancho del scrollbar */
+    height: 8px; /* Alto del scrollbar */
+    background-color: transparent; /* Fondo transparente */
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.5); /* Color semitransparente del thumb */
+    border-radius: 3px; /* Bordes redondeados */
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+    background: transparent; /* Fondo transparente del track */
+    border-radius: 8px; /* Bordes redondeados */
+}
+
+/* Oculta completamente las flechas */
+.scrollbar-custom::-webkit-scrollbar-button:single-button {
+    display: none; /* Oculta las flechas */
+    width: 0;
+    height: 0;
+}
