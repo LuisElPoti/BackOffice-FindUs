@@ -22,10 +22,11 @@ import Popup from "reactjs-popup";
 import 'reactjs-popup/dist/index.css';
 import { FaEdit, FaCheck, FaTimes } from 'react-icons/fa'; // Import icons for edit, check, and cancel
 import TablaPublicaciones from "../components/tablePublicaciones";
+import ModalAdentroPublicaciones from "../components/modalAdentroPublicaciones";
 
 export default function Publicaciones() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState({mostrar: false, id: undefined});
   const [sendingPublicacionData, setSendingPublicacionData] = useState(false);
   const [apiResponse, setApiResponse] = useState(null);
   const [dataTiposDocumentos, setDataTiposDocumentos] = useState([]);
@@ -40,12 +41,14 @@ export default function Publicaciones() {
    const [selectedPerson, setSelectedPerson] = useState(null); // State to hold the selected person info
     const [isEditing, setIsEditing] = useState({}); // To track editable state for each field
 
-    const handleRowClick = (personData) => {
-        setSelectedPerson(personData); // Set the clicked person's data
+    const handleRowClick = (idPublicacion) => {
+        // setSelectedPerson(personData); // Set the clicked person's data
+        setModalVisible({mostrar:true, id: idPublicacion});
     };
 
     const closePopup = () => {
-        setSelectedPerson(null); // Clear the popup when closed
+        // setSelectedPerson(null); // Clear the popup when closed
+        setModalVisible(false);
     };
 
     const handleEditToggle = (field) => {
@@ -727,7 +730,7 @@ export default function Publicaciones() {
         </div>
 
             {/* Popup to show when a row is clicked */}
-            {selectedPerson && (
+            {/* {selectedPerson && (
                 <Popup
                     open={true}
                     closeOnDocumentClick
@@ -755,7 +758,6 @@ export default function Publicaciones() {
                             className="w-full h-auto mb-4 rounded-lg shadow-sm"
                         />
 
-                        {/* Editable Fields */}
                         <div className="space-y-6">
                             <div className="flex justify-between items-center">
                                 <div>
@@ -868,7 +870,9 @@ export default function Publicaciones() {
                         </div>
                     </div>
                 </Popup>
-            )}
+            )} */}
+
+            <ModalAdentroPublicaciones idPublicacion={modalVisible.id}  open={modalVisible.mostrar} handleClose={() => setModalVisible({mostrar: false, id:undefined})} />
        </div>
   );
 }

@@ -20,6 +20,7 @@
     "axios": "^1.7.7",
     "formik": "^2.4.6",
     "js-cookie": "^3.0.5",
+    "material-ui-image": "^3.3.2",
     "next": "14.2.5",
     "react": "^18",
     "react-dom": "^18",
