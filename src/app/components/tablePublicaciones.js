@@ -166,7 +166,7 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
                             className="bg-transparent focus:outline-none px-4 w-full text-sm"
                         >
                             <option value="-1">Todos</option>
-                            {estados.map((estado) => (
+                            {estados?.map((estado) => (
                                 <option key={estado.id.toString()} value={estado.id}>{estado.nombreestado}</option>
                             ))}
                             {/* <option value="ACTIVO">Activo</option>
@@ -210,7 +210,7 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
                     sx={{ 
                         width: '100%', 
                         maxHeight: '100%', 
-                        overflowY: 'auto', 
+                        // overflowY: 'auto', 
                         // scrollbarWidth: 'none', 
                         // '&::-webkit-scrollbar': { display: 'none' } 
                     }}
@@ -244,7 +244,7 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
                                             key={publicacion?.id}
                                             sx={{ '&:last-child td, &:last-child th': { border: 0 }, cursor: 'pointer' }}
                                             // onRowClick={() => onRowClick(row)} // Trigger onRowClick when row is clicked
-                                            onDoubleClick={() => onRowClick(rows[0])} // Trigger onRowClick when row is double clicked 
+                                            onDoubleClick={() => onRowClick(publicacion?.id)} // Trigger onRowClick when row is double clicked 
                                         >
                                             <TableCell align="left" className='text-center'>{publicacion?.id}</TableCell>
                                             <TableCell align="left" className='text-center'>{publicacion?.nombredesaparecido}</TableCell>

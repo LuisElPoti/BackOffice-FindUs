@@ -69,3 +69,19 @@ export const eliminarPublicacion = async (id, token) => {
         return error.response;
     }
 }
+
+
+export const obtenerInfoDesaparecidoByID = async (id) => {
+    try {
+        const response = await axios.get(apiRoutes.obtenerInfoDesaparecidoByID(id));
+        return response;
+    } catch (error) {
+        console.log(error);
+        return error.response;
+    }
+}
+
+export const formatearFecha = (fecha) => {
+    const date = new Date(fecha);
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+}
