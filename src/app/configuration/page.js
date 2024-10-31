@@ -33,6 +33,12 @@ export default function Configuracion() {
                 {/* Botones para cambiar entre secciones, centrados */}
                 <div className="flex justify-center space-x-4 mb-6 mt-4"> 
                     <button
+                        className={`py-2 px-4 rounded-md ${selectedSection === "perfil" ? "bg-blueOscuro text-white" : "bg-white text-customBlue"}`}
+                        onClick={() => setSelectedSection("perfil")}
+                    >
+                        <FaUser className="w-5 h-5 inline-block" /> Perfil
+                    </button>
+                    <button
                         className={`py-2 px-4 rounded-md ${selectedSection === "general" ? "bg-blueOscuro text-white" : "bg-white text-customBlue"}`}
                         onClick={() => setSelectedSection("general")}
                     >
@@ -43,12 +49,6 @@ export default function Configuracion() {
                         onClick={() => setSelectedSection("idioma")}
                     >
                         <FaLanguage className="w-5 h-5 inline-block" /> Idioma
-                    </button>
-                    <button
-                        className={`py-2 px-4 rounded-md ${selectedSection === "perfil" ? "bg-blueOscuro text-white" : "bg-white text-customBlue"}`}
-                        onClick={() => setSelectedSection("perfil")}
-                    >
-                        <FaUser className="w-5 h-5 inline-block" /> Perfil
                     </button>
                     <button
                         className={`py-2 px-4 rounded-md ${selectedSection === "seguridad" ? "bg-blueOscuro text-white" : "bg-white text-customBlue"}`}

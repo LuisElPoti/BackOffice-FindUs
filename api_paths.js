@@ -18,13 +18,19 @@ const apiRoutes = {
 
     //Rutas Rol
     obtenerRol: () => `${API_BASE_URL}/roles/obtenerRoles`,
+    obtenerInfoBasicaUser : () => `${API_BASE_URL}/user/obtener_info_basica_user`,
 
     //Rutas Tipo de Documento
     obtenerTiposDocumentos: () => `${API_BASE_URL}/tipo_documento/obtenerTipoDocumento`,
+
     //Rutas Categoria de Material
     obtenerCategoriaMaterial: () => `${API_BASE_URL}/categoria_material/obtenerCategoriaMaterial`,
+
     //Rutas Recurso Educativo
     crearRecursoEducativo: () => `${API_BASE_URL}/crear_recursos_educativos`,
+    obtenerTipoMaterialEducativo: () => `${API_BASE_URL}/tipo_material_educativo/obtenerTipoMaterialEducativo`,
+    obtenerMaterialEducativoTabla: (page,limit) => `${API_BASE_URL}/recursos_educativos/obtenerMaterialEducativoTabla/${page}/${limit}`,
+    obtenerMaterialEducativoByID: (id) => `${API_BASE_URL}/recursos_educativos/obtenerMaterialEducativoByID/${id}`,
 
     //Rutas de Publicacion
     obtenerPublicaciones: () => `${API_BASE_URL}/desaparecido/obtenerDesaparecidos`,
@@ -34,7 +40,12 @@ const apiRoutes = {
     eliminarPublicacion: (id) => `${API_BASE_URL}/desaparecido/deleteDesaparecido/${id}`,
     obtenerDesaparecidosTabla: (page,limit) => `${API_BASE_URL}/desaparecido/obtenerDesaparecidoTabla/${page}/${limit}`,
     obtenerInfoDesaparecidoByID: (id) => `${API_BASE_URL}/desaparecido/obtenerInfoDesaparecidoByID/${id}`,
+    crearComentarioPublicaciones: () => `${API_BASE_URL}/desaparecido/crearComentarioPublicaciones`,
 
+    //Rutas de Avistamientos
+    crearAvistamiento: () => `${API_BASE_URL}/avistamiento/crearAvistamiento`,
+    subirFotoAvistamiento: () => `${API_BASE_URL}/avistamiento/subirFotoAvistamiento`,
+    obtenerAvistamientoPublicacion: (idPublicacion) => `${API_BASE_URL}/avistamiento/obtenerAvistamientoPublicacion/${idPublicacion}`,
 
     // Fotos publicacion
     subirArchivo: () => `${API_BASE_URL}/fotospublicacion/crearFotoPublicacion`,
@@ -42,6 +53,7 @@ const apiRoutes = {
     //Estados
     obtenerEstadosPublicaciones: () => `${API_BASE_URL}/estado/obtenerEstadosPublicaciones`,
     obtenerEstadosGeneral: () => `${API_BASE_URL}/estado/obtenerEstadosGeneral`,
+    obtenerEstadosMaterialEducativo: () => `${API_BASE_URL}/estado/obtenerEstadosMaterialEducativo`,
     
     // Otras rutas
     // ...
