@@ -54,12 +54,12 @@ export default function Mapa({ lat_value = undefined, long_value = undefined, lo
         setFieldValue(long_name, lng);
         
         // Centra el mapa y ajusta el zoom al seleccionar una ubicación
-        setMapCenter(newPosition);
-        setMapZoom(16); // Ajuste del zoom al seleccionar una ubicación
+        // setMapCenter(newPosition);
+        // setMapZoom(16); // Ajuste del zoom al seleccionar una ubicación
 
-        if (onPositionChange) {
-            onPositionChange(newPosition);
-        }
+        // if (onPositionChange) {
+        //     onPositionChange(newPosition);
+        // }
 
     }, [lat_name, long_name, setFieldValue, onPositionChange]);
 
@@ -69,11 +69,11 @@ export default function Mapa({ lat_value = undefined, long_value = undefined, lo
         setMapZoom(ev.detail.zoom);
     }, []);
 
-    // Sincorinizar la posicion y el zoom del mapa con el estado
-    useEffect(() => {
-        setMapCenter(initialPosition || { lat: 0, lng: 0 });
-        setMapZoom(initialZoom || 14);
-    }, [initialPosition, initialZoom]);
+    // // Sincorinizar la posicion y el zoom del mapa con el estado
+    // useEffect(() => {
+    //     setMapCenter(initialPosition || { lat: 0, lng: 0 });
+    //     setMapZoom(initialZoom || 14);
+    // }, [initialPosition, initialZoom]);
 
     return (
         <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
