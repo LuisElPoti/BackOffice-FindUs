@@ -98,6 +98,16 @@ const login = async (data) => {
     }
 }
 
+const obtenerUsuariosTabla = async (page, limit, filtros) => {
+    try {
+        const response = await axios.get(`${apiRoutes.obtenerUsuariosTabla(page, limit)}?${filtros}`);
+        console.log(response)
+        return response;
+    } catch (error) {
+        console.log(error);
+        return error.response;
+    }
+}
 
 //Exportar funciones
 export {
@@ -108,5 +118,6 @@ export {
     verificarCodigoCambioContrasena,
     cambiarContrasena,
     login,
-    verificarToken
+    verificarToken,
+    obtenerUsuariosTabla
 };

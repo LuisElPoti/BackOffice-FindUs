@@ -26,7 +26,10 @@ import ModalAdentroPublicaciones from "../components/modalAdentroPublicaciones";
 
 export default function Publicaciones() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState({mostrar: false, id: undefined});
+  const [modalVisible, setModalVisible] = useState({
+    mostrar: false,
+    id: undefined,
+  });
   const [sendingPublicacionData, setSendingPublicacionData] = useState(false);
   const [apiResponse, setApiResponse] = useState(null);
   const [dataTiposDocumentos, setDataTiposDocumentos] = useState([]);
@@ -35,37 +38,36 @@ export default function Publicaciones() {
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [mapPosition, setMapPosition] = useState({ lat: 0, lng: 0 });
   const [mapZoom, setMapZoom] = useState(14); // Establece un zoom inicial. Puede ser un valor entre 0 y 21
-  
-  
+
   //AQUI LO PRIMERO DE ROSANNA
-   const [selectedPerson, setSelectedPerson] = useState(null); // State to hold the selected person info
-    const [isEditing, setIsEditing] = useState({}); // To track editable state for each field
+  const [selectedPerson, setSelectedPerson] = useState(null); // State to hold the selected person info
+  const [isEditing, setIsEditing] = useState({}); // To track editable state for each field
 
-    const handleRowClick = (idPublicacion) => {
-        // setSelectedPerson(personData); // Set the clicked person's data
-        setModalVisible({mostrar:true, id: idPublicacion});
-    };
+  const handleRowClick = (idPublicacion) => {
+    // setSelectedPerson(personData); // Set the clicked person's data
+    setModalVisible({ mostrar: true, id: idPublicacion });
+  };
 
-    const closePopup = () => {
-        // setSelectedPerson(null); // Clear the popup when closed
-        setModalVisible(false);
-    };
+  const closePopup = () => {
+    // setSelectedPerson(null); // Clear the popup when closed
+    setModalVisible(false);
+  };
 
-    const handleEditToggle = (field) => {
-        setIsEditing((prevState) => ({
-            ...prevState,
-            [field]: !prevState[field], // Toggle the edit mode for the field
-        }));
-    };
+  const handleEditToggle = (field) => {
+    setIsEditing((prevState) => ({
+      ...prevState,
+      [field]: !prevState[field], // Toggle the edit mode for the field
+    }));
+  };
 
-    const handleFieldChange = (field, value) => {
-        setSelectedPerson((prevState) => ({
-            ...prevState,
-            [field]: value, // Update the selected person's data
-        }));
-    };
-    //AQUI TERMINA LO DE ROSANNA
-  
+  const handleFieldChange = (field, value) => {
+    setSelectedPerson((prevState) => ({
+      ...prevState,
+      [field]: value, // Update the selected person's data
+    }));
+  };
+  //AQUI TERMINA LO DE ROSANNA
+
   const [expandedSection, setExpandedSection] = useState(null);
   const [formFilled, setFormFilled] = useState({
     personalInfo: false,
@@ -300,14 +302,13 @@ export default function Publicaciones() {
             }
           }
         } else {
-            toast.error("Error al crear la publicación", {
-                position: "top-center",
-                autoClose: 5000,
-                className: "w-auto",
-            });
+          toast.error("Error al crear la publicación", {
+            position: "top-center",
+            autoClose: 5000,
+            className: "w-auto",
+          });
         }
         setSendingPublicacionData(false);
-
       } catch (error) {
         console.log("Error al crear la publicación: ", error);
         setApiResponse(error);
@@ -315,35 +316,33 @@ export default function Publicaciones() {
     },
   });
 
-  
-
-//   useEffect(() => {
-//     console.log("Respuesta de la petición:", apiResponse);
-//     if (apiResponse?.status == 200) {
-//       toast.success("Publicación creada correctamente", {
-//         position: "top-center",
-//         autoClose: 2000,
-//         className: "w-auto",
-//       });
-//       setTimeout(() => {
-//         router.push("/publicaciones");
-//       }, 5000);
-//     } else {
-//       toast.error("Error al crear la publicación", {
-//         position: "top-center",
-//         autoClose: 5000,
-//         className: "w-auto",
-//       });
-//     }
-//     setSendingPublicacionData(false);
-//   }, [apiResponse]);
+  //   useEffect(() => {
+  //     console.log("Respuesta de la petición:", apiResponse);
+  //     if (apiResponse?.status == 200) {
+  //       toast.success("Publicación creada correctamente", {
+  //         position: "top-center",
+  //         autoClose: 2000,
+  //         className: "w-auto",
+  //       });
+  //       setTimeout(() => {
+  //         router.push("/publicaciones");
+  //       }, 5000);
+  //     } else {
+  //       toast.error("Error al crear la publicación", {
+  //         position: "top-center",
+  //         autoClose: 5000,
+  //         className: "w-auto",
+  //       });
+  //     }
+  //     setSendingPublicacionData(false);
+  //   }, [apiResponse]);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-50-50-vertical">
       {/* <div className="h-[45%] bg-greenBackground relative"> */}
-        <h2 className="text-xl text-letterColor font-bold ml-12 mt-8">
-          Publicaciones
-        </h2>
+      <h2 className="text-xl text-letterColor font-bold ml-12 mt-8">
+        Publicaciones
+      </h2>
       {/* </div> */}
 
       <div className="absolute top-8 right-8 flex items-center">
@@ -720,17 +719,24 @@ export default function Publicaciones() {
 
       {/* <div className="relative z-10 bg-grayBackground -mt-36 rounded-tl-3xl rounded-tr-3xl p-10 overflow-y-scroll"></div> */}
 
-       <div className="relative mt-[10vh]">
-                {/* Pass the handleRowClick to MyTable to trigger the popup */}
-                <TablaPublicaciones 
-                  headers={["ID Publicación","Nombre","Fecha Desaparición", "Fecha Publicación","Estatus",""]} 
-                  onRowClick={handleRowClick} 
-                  className={"flex m-auto top-0 left-0 right-0 max-h-[65vh]"}
-                />
-        </div>
+      <div className="relative mt-[10vh]">
+        {/* Pass the handleRowClick to MyTable to trigger the popup */}
+        <TablaPublicaciones
+          headers={[
+            "ID Publicación",
+            "Nombre",
+            "Fecha Desaparición",
+            "Fecha Publicación",
+            "Estatus",
+            "",
+          ]}
+          onRowClick={handleRowClick}
+          className={"flex m-auto top-0 left-0 right-0 max-h-[65vh]"}
+        />
+      </div>
 
-            {/* Popup to show when a row is clicked */}
-            {/* {selectedPerson && (
+      {/* Popup to show when a row is clicked */}
+      {/* {selectedPerson && (
                 <Popup
                     open={true}
                     closeOnDocumentClick
@@ -872,7 +878,11 @@ export default function Publicaciones() {
                 </Popup>
             )} */}
 
-            <ModalAdentroPublicaciones idPublicacion={modalVisible.id}  open={modalVisible.mostrar} handleClose={() => setModalVisible({mostrar: false, id:undefined})} />
-       </div>
+      <ModalAdentroPublicaciones
+        idPublicacion={modalVisible.id}
+        open={modalVisible.mostrar}
+        handleClose={() => setModalVisible({ mostrar: false, id: undefined })}
+      />
+    </div>
   );
 }
