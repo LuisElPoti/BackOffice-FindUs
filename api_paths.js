@@ -1,4 +1,7 @@
 //Agregar las rutas de conexión al backend Aquí
+
+import { obtenerUsuariosTabla } from "./services/userService";
+
 // API Link de prueba en Emulador de Android: en PC
 const API_BASE_URL = 'http://localhost:5000/api';
 
@@ -11,6 +14,10 @@ const apiRoutes = {
     cambiar_contrasena: () => `${API_BASE_URL}/user/cambiar_contrasena`,
     loginUsuario: () => `${API_BASE_URL}/user/login`,
     verificar_token_valido: () => `${API_BASE_URL}/user/verificar_token_valido`,
+    obtenerUsuariosTabla: (page, limit) => `${API_BASE_URL}/user/obtenerUsuariosTabla/${page}/${limit}`,
+
+    //Rutas Rol
+    obtenerRol: () => `${API_BASE_URL}/roles/obtenerRoles`,
 
     //Rutas Tipo de Documento
     obtenerTiposDocumentos: () => `${API_BASE_URL}/tipo_documento/obtenerTipoDocumento`,
@@ -34,6 +41,7 @@ const apiRoutes = {
 
     //Estados
     obtenerEstadosPublicaciones: () => `${API_BASE_URL}/estado/obtenerEstadosPublicaciones`,
+    obtenerEstadosGeneral: () => `${API_BASE_URL}/estado/obtenerEstadosGeneral`,
     
     // Otras rutas
     // ...
