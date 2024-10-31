@@ -8,8 +8,13 @@ import * as Yup from "yup";
 import {crearRecursoEducativo} from "../../../services/materialEducativoServices";
 import { toast,ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { convertToBase64 } from "../../../services/filesServices";
+import TablaMaterialEducativo from "../components/tablaMaterialEducativo";
+import ModalAdentroMaterialEducativo from "../components/modalAdentroMaterialEducativo";
 
 export default function Material() {
+    const [modalVisible, setModalVisible] = useState({mostrar: false, id: undefined});
+    const [nuevoRecurso, setNuevoRecurso] = useState(false);
     const [expandedSection, setExpandedSection] = useState(null);
     const [sendingUserData, setSendingUserData] = useState(false);
     const [openModal, setOpenModal] = useState(false);
@@ -22,6 +27,11 @@ export default function Material() {
 
     const toggleSection = (section) => {
         setExpandedSection(expandedSection === section ? null : section);
+    };
+
+    const handleRowClick = (idMaterialEducativo) => {
+        // setSelectedPerson(personData); // Set the clicked person's data
+        setModalVisible({mostrar:true, id: idMaterialEducativo});
     };
 
     const handleInputChange = (section) => {
@@ -57,7 +67,7 @@ export default function Material() {
     const validationSchema = Yup.object().shape({
         idUsuario: Yup.number()
           .required(""),
-        idCategoriaMaterial: Yup.number()
+        idCategoriaMaterial: Yup.number().moreThan(0)
           .required(""),
         nombre: Yup.string()
           .required("El nombre del Material es requerido"),
@@ -72,7 +82,7 @@ export default function Material() {
       const formik = useFormik({
         initialValues: {
           idUsuario: 33,
-          idCategoriaMaterial: "",
+          idCategoriaMaterial: -1,
           nombre: "",
           descripcion: "",
           fileName: "",
@@ -83,13 +93,13 @@ export default function Material() {
         validationSchema: validationSchema,
         onSubmit: (values) => {
             // console.log("Valores del formulario: ", values);
-            if(selectedCategory === 1 || selectedCategory === 3){
+            if(formik?.values?.idCategoriaMaterial === 1 || formik?.values?.idCategoriaMaterial === 3){
                 values.urlmaterial = "";
                 if(values.filebase64 === ""){
                     toast.error("Debe subir un archivo", {position: "top-center",className: "w-auto"});
                     return;
                 }
-            }else if(selectedCategory === 2 || selectedCategory === 4){
+            }else if(formik?.values?.idCategoriaMaterial === 2 || formik?.values?.idCategoriaMaterial === 4){
                 values.filebase64 = "";
                 values.fileName = "";
                 values.fileMimetype = "";
@@ -109,9 +119,14 @@ export default function Material() {
                     personalInfo: false,
                     documentUpload: false,
                 });
+                setNuevoRecurso(true);
                 handlePopupClose();
                 // formik.resetForm();
             }
+          }).catch((error) => {
+            toast.error("Error al crear el material educativo", {position: "top-center",className: "w-auto"});
+            console.log("Error al crear el material educativo: ", error);
+            setSendingUserData(false);
           });
         }
       });
@@ -131,16 +146,7 @@ export default function Material() {
         console.log('Base64:', fileBase64);
     };
     
-    // Función para convertir archivo a base64
-    const convertToBase64 = (file) => {
-        console.log('file:', file);
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result); // Tomar solo la parte base64
-            reader.onerror = (error) => reject(error);
-        });
-    };
+
     
     const handlePopupClose = () => { 
         setExpandedSection(null);
@@ -151,7 +157,7 @@ export default function Material() {
     };
 
     const renderInputForCategory = () => {
-        if (selectedCategory === 1 || selectedCategory === 3) {
+        if (formik?.values?.idCategoriaMaterial === 1 || formik?.values?.idCategoriaMaterial === 3) {
             return (
                 <div className="mb-4">
                     <label className="block text-sm font-medium mb-2" htmlFor="fileUpload">
@@ -166,7 +172,10 @@ export default function Material() {
                     />
                 </div>
             );
-        } else {
+        } else if (formik?.values?.idCategoriaMaterial === -1){
+            return null;
+        }
+            else {
             return (
                 <div className="mb-4">
                     <label className="block text-sm font-medium mb-2" htmlFor="urlInput">
@@ -183,15 +192,14 @@ export default function Material() {
                 </div>
             );
         }
-        return null;
     };
 
     return (
-        <div className="flex flex-col h-screen overflow-hidden bg-colorResumen">
+        <div className="flex flex-col h-screen overflow-hidden bg-50-50-vertical">
             <ToastContainer />
-            <div className="h-[45%] bg-greenBackground relative">
+            {/* <div className="h-[45%] bg-greenBackground relative"> */}
                 <h2 className="text-xl text-letterColor font-bold ml-12 mt-8">Material Educativo</h2>
-            </div>
+            {/* </div> */}
 
             <div className="absolute top-8 right-8 flex items-center">
                 <Popup
@@ -262,7 +270,7 @@ export default function Material() {
                                                 className="w-full px-3 py-2 border border-gray-300 rounded"
                                                 onChange={handleSelectChange}
                                             >
-                                                <option value="">Selecciona una categoría</option>
+                                                <option value={-1}>Selecciona una categoría</option>
                                                 {data.map((item) => (
                                                     <option key={item.id} value={item.id}>
                                                         {item.nombrecategoriamaterial}
@@ -294,7 +302,20 @@ export default function Material() {
                 </Popup>
             </div>
 
-            <div className="relative z-10 bg-grayBackground -mt-36 rounded-tl-3xl rounded-tr-3xl p-10 overflow-y-scroll"></div>
+            {/* <div className="relative z-10 bg-grayBackground -mt-36 rounded-tl-3xl rounded-tr-3xl p-10 overflow-y-scroll"></div> */}
+
+            <div className="relative mt-[10vh]">
+                {/* Pass the handleRowClick to MyTable to trigger the popup */}
+                <TablaMaterialEducativo 
+                  headers={["ID Material","Nombre del Material","Tipo de Material","Fecha de Creación","Estatus",""]} 
+                  onRowClick={handleRowClick} 
+                  className={"flex m-auto top-0 left-0 right-0 max-h-[65vh]"}
+                  nuevoRecurso={nuevoRecurso}
+                  setNuevoRecurso={setNuevoRecurso}
+                />
+            </div>
+
+            <ModalAdentroMaterialEducativo open={modalVisible.mostrar} idMaterialEducativo={modalVisible.id} handleClose={() => setModalVisible({mostrar: false, id:undefined})}/>
         </div>
     );
 }

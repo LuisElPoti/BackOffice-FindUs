@@ -1,7 +1,7 @@
 import apiRoutes from "../api_paths";
 import axios from "axios";
 
-const crearRecursoEducativo = async (values) => {
+export const crearRecursoEducativo = async (values) => {
     try {
         const response = await axios.post(apiRoutes.crearRecursoEducativo(), values);
         return response;  // Devuelve los datos directamente
@@ -11,6 +11,24 @@ const crearRecursoEducativo = async (values) => {
     }
 };
 
-module.exports = {
-    crearRecursoEducativo       
+export const obtenerMaterialEducativoTabla = async (page,limit, filtros) => {
+    try {
+        const response = await axios.get(`${apiRoutes.obtenerMaterialEducativoTabla(page,limit)}?${filtros}`);
+        console.log("ASASASAsa")
+        console.log(response)
+        return response;
+    } catch (error) {
+        console.log(error);
+        return error.response;
+    }
+}
+
+export const obtenerMaterialEducativoByID = async (id) => {
+    try {
+        const response = await axios.get(apiRoutes.obtenerMaterialEducativoByID(id));
+        return response;
+    } catch (error) {
+        console.log(error);
+        return error.response;
+    }
 }
