@@ -62,6 +62,19 @@ const  cambiarContrasena = async (data, token) => {
     }
 }
 
+export const obtenerInfoBasicaUserBD = async (token) => {
+    try {
+        const response = await axios.get(apiRoutes.obtenerInfoBasicaUser(),{
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
 const  verificarToken = async (token) => {
     try {
         const response = await axios.get(apiRoutes.verificar_token_valido(), {

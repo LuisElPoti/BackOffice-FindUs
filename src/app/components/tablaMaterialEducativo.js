@@ -8,35 +8,28 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { IoMdMore } from "react-icons/io";
 import { useState } from 'react';
-import { obtenerDesaparecidosTabla } from '../../../services/publicacionServices';
-import { obtenerEstadosPublicaciones } from '../../../services/categoriasServices';
+import { obtenerMaterialEducativoTabla } from '../../../services/materialEducativoServices';
+import { obtenerEstadosMaterialEducativo, obtenerTipoMaterialEducativo} from '../../../services/categoriasServices';
 import { TableFooter, TablePagination, CircularProgress, Menu, MenuItem } from '@mui/material';
 import TablePaginationActions from './tableActionsComponent'; 
 
-function createData(ID, nombre, fechaDesaparicion,fechaPublicacion, estatus) {
-    return { ID, nombre, fechaDesaparicion, fechaPublicacion,estatus };
-}
-
-const rows = [
-    createData(1105980, 'Luis Vargas Colon', '14/09/2024', '14/09/2024','ACTIVO'),
-    createData(1105981, 'Rosanna Bautista Minyety', '15/09/2024', '14/09/2024','ACTIVO'),
-    createData(1105982, 'William Fernandez Cruz', '15/09/2024', '14/09/2024','INACTIVO'),
-    createData(1105983, 'Cristian Castro Garcia', '14/10/2024', '14/09/2024','ACTIVO'),
-    createData(1105984, 'Dario Contreras Ovalle', '24/10/2024', '14/09/2024','INACTIVO'),
-    createData(1105985, 'Dario Contreras Ovalle', '03/11/2024', '14/09/2024','INACTIVO'),
-    // Add more rows if needed
-];
-
-export default function TablaPublicaciones({ headers, onRowClick,className }) {
+export default function TablaMaterialEducativo({ headers, onRowClick,className,nuevoRecurso, setNuevoRecurso }) {
     const [anchorEl, setAnchorEl] = useState(null);
-    const [search, setSearch] = useState('');
-    const [fechaDesde, setFechaDesde] = useState(null);
-    const [fechaHasta, setFechaHasta] = useState(null);
+    const [estadoMaterial, setEstadoMaterial] = useState(null);
+    const [selectedMaterial, setSelectedMaterial] = useState(null);
+
+    const [nombreMaterial, setNombreMaterial] = useState('');
     const [estatus, setEstatus] = useState('-1');
+    const [tipoMaterial, setTipoMaterial] = useState('-1');
+
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(10);
+
     const [data, setData] = useState([]);
+
     const [estados, setEstados] = useState([]);
+    const [tipoMaterialEducativo, setTipoMaterialEducativo] = useState([]);
+    
     const [loading, setLoading] = useState(false);
     const [filtersCleaned, setFiltersCleaned] = useState(false);
 
@@ -48,13 +41,14 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
     
     const obtenerData = () => {
         setLoading(true);
-        const filtrosSearch = (search && search != '') ? `&nombreDesaparecido=${search}` : '';
-        const filtrosFechaDesde = fechaDesde ? `&fechaDesde=${fechaDesde}` : '';
-        const filtrosFechaHasta = fechaHasta ? `&fechaHasta=${fechaHasta}` : '';
+        const filtrosNombre = (nombreMaterial && nombreMaterial != '') ? `&nombreMaterial=${nombreMaterial}` : '';
+        // const filtrosFechaDesde = fechaDesde ? `&fechaDesde=${fechaDesde}` : '';
+        // const filtrosFechaHasta = fechaHasta ? `&fechaHasta=${fechaHasta}` : '';
         const filtrosEstatus = (estatus && estatus != "-1") ? `&estatus=${estatus}` : '';
-        const filtros = `${filtrosSearch}${filtrosFechaDesde}${filtrosFechaHasta}${filtrosEstatus}`;
-        obtenerDesaparecidosTabla(page, limit, filtros).then((response) => {
-            console.log(response.data);
+        const filtrosTipoMaterial = (tipoMaterial && tipoMaterial != "-1") ? `&tipoMaterial=${tipoMaterial}` : '';
+        const filtros = `${filtrosNombre}${filtrosEstatus}${filtrosTipoMaterial}`;
+        obtenerMaterialEducativoTabla(page, limit, filtros).then((response) => {
+            console.log("MATERIALES EDUCATIVOS",response.data);
             setData(response.data);
             setLoading(false);
         }).catch((error) => {
@@ -63,7 +57,7 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
     };
 
     const obtenerEstados = () => {
-        obtenerEstadosPublicaciones().then((response) => {
+        obtenerEstadosMaterialEducativo().then((response) => {
             setEstados(response.data);
             console.log("ESTADOS",response.data);
         }).catch((error) => {
@@ -71,10 +65,17 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
         });
     }
 
+    const obtenerTipoMaterial = () => {
+        obtenerTipoMaterialEducativo().then((response) => {
+            setTipoMaterialEducativo(response.data);
+            console.log("TIPO MATERIAL EDUCATIVO",response.data);
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
     const cleanFiltlers = () => {
-        setSearch('');
-        setFechaDesde(null);
-        setFechaHasta(null);
+        setNombreMaterial('');
+        setTipoMaterial('-1');
         setEstatus('-1');
         setFiltersCleaned(true);
         // setPage(1);
@@ -91,11 +92,20 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
     , [filtersCleaned]);
 
     useEffect(() => {
+        if(nuevoRecurso){
+            obtenerData();
+            setNuevoRecurso(false);
+        }
+    }
+    , [nuevoRecurso]);
+
+    useEffect(() => {
         obtenerData();
     }, [page, limit]);
 
     useEffect(() => {
         obtenerEstados();
+        obtenerTipoMaterial();
     }, []);
 
     useEffect(() => {
@@ -109,29 +119,32 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
     }
     , [limit]);
 
-    const handleClick = (event, idPublicacion) => {
+    const handleClick = (event, idMaterial, idEstado) => {
+        setEstadoMaterial(idEstado);
         setAnchorEl(event.currentTarget);
-        console.log("ID DE LA PUBLICACION",idPublicacion)
+        setSelectedMaterial(idMaterial);
+        // console.log("ID DE LA PUBLICACION",idPublicacion)
         // setSelectedPublicacion(publicacion);
     };
 
     const handleClose = () => {
         setAnchorEl(null);
-        setSelectedPublicacion(null);
+        // setSelectedPublicacion(null);
     };
 
     const handleEdit = () => {
-        console.log('Editando publicación:', selectedPublicacion);
-        handleClose();
+        // console.log('Editando publicación:', selectedPublicacion);
     };
 
     const handleView = () => {
-        console.log('Viendo publicación:', selectedPublicacion);
+        // console.log('Viendo publicación:', selectedPublicacion);
+        onRowClick(selectedMaterial);
+
         handleClose();
     };
 
     const handleDeactivate = () => {
-        console.log('Desactivando publicación:', selectedPublicacion);
+        // console.log('Desactivando publicación:', selectedPublicacion);
         handleClose();
     };
 
@@ -140,12 +153,12 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
         <>
             <div className="flex items-center gap-4 w-[95%] mx-auto bg-white rounded-lg p-4 shadow-md mb-4">
                 {/* Campo de búsqueda */}
-                <div className="flex items-center bg-[#f0f0f0] rounded-md p-2 w-full max-w-[30%]">
+                <div className="flex items-center bg-[#f0f0f0] rounded-md p-2 w-full max-w-[50%]">
                     <input
                         type="text"
-                        placeholder="Buscar por nombre de desaparecido"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Buscar por nombre de material"
+                        value={nombreMaterial}
+                        onChange={(e) => setNombreMaterial(e.target.value)}
                         className="bg-transparent focus:outline-none px-4 w-full text-sm"
                     />
                     <button className="text-gray-500 px-2">
@@ -155,38 +168,22 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
                     </button>
                 </div>
 
-                {/* Selector de Fecha Desde*/}
-                <div className="flex items-center bg-[#f0f0f0] rounded-md p-2  w-auto">
-                        <label className="text-sm text-gray-500">Desde:</label>
-                        <input
-                            type="date"
-                            max={new Date().toISOString().split("T")[0]}
-                            defaultValue={fechaDesde}
-                            value={fechaDesde}
-                            onChange={(e) => setFechaDesde(new Date(e.target.value).toISOString().split("T")[0])}
+                {/* Selector de Tipo Material*/}
+                    <div className="flex items-center bg-[#f0f0f0] rounded-md p-2  w-auto">
+                        <label className="text-sm text-gray-500">Tipo:</label>
+                        <select
+                            value={tipoMaterial}
+                            onChange={(e) => setTipoMaterial(e.target.value)}
                             className="bg-transparent focus:outline-none px-4 w-full text-sm"
-                        />
-                </div>
+                        >
+                            <option value="-1">Todos</option>
+                            {tipoMaterialEducativo?.map((tipo) => (
+                                <option key={tipo.id.toString()} value={tipo.id}>{tipo.nombrecategoriamaterial}</option>
+                            ))}
+                        </select>
+                    </div>
 
-                {/* Selector de Fecha Hasta*/}
-                <div className="flex items-center bg-[#f0f0f0] rounded-md p-2  w-auto">
-                        <label className="text-sm text-gray-500">Hasta:</label>
-                        <input
-                            type="date"
-                            defaultValue={fechaHasta}
-                            max={new Date().toISOString().split("T")[0]}
-                            min={fechaDesde}
-                            value={fechaHasta}
-                            datatype='date'
-                            onChange={(e) => {
-                                setFechaHasta(new Date(e.target.value).toISOString().split("T")[0])
-                                console.log(e.target.value)
-                            }}
-                            className="bg-transparent focus:outline-none px-4 w-full text-sm"
-                        />
-                </div>
-
-                    {/* Selector de Fecha Hasta*/}
+                    {/* Selector de Estado*/}
                     <div className="flex items-center bg-[#f0f0f0] rounded-md p-2  w-auto">
                         <label className="text-sm text-gray-500">Estatus:</label>
                         <select
@@ -198,8 +195,6 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
                             {estados?.map((estado) => (
                                 <option key={estado.id.toString()} value={estado.id}>{estado.nombreestado}</option>
                             ))}
-                            {/* <option value="ACTIVO">Activo</option>
-                            <option value="INACTIVO">Inactivo</option> */}
                         </select>
                 </div>
 
@@ -263,30 +258,31 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
                         <TableBody>
                             {loading ? (
                                     <TableRow>
-                                        <TableCell colSpan={headers.length} align="center">
+                                        <TableCell colSpan={headers?.length} align="center">
                                             <CircularProgress />
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    data?.publicaciones?.map((publicacion) => (
+                                    data?.materialesEducativos?.map((material) => (
                                         <TableRow
-                                            key={publicacion?.id}
+                                            key={material?.id}
                                             sx={{ '&:last-child td, &:last-child th': { border: 0 }, cursor: 'pointer' }}
                                             // onRowClick={() => onRowClick(row)} // Trigger onRowClick when row is clicked
-                                            onDoubleClick={() => onRowClick(publicacion?.id)} // Trigger onRowClick when row is double clicked 
+                                            onDoubleClick={() => onRowClick(material?.id)} // Trigger onRowClick when row is double clicked 
                                         >
-                                            <TableCell align="left" className='text-center'>{publicacion?.id}</TableCell>
-                                            <TableCell align="left" className='text-center'>{publicacion?.nombredesaparecido}</TableCell>
-                                            <TableCell align="left" className='text-center'>{formatearFecha(publicacion?.fechadesaparicion)}</TableCell>
-                                            <TableCell align="left" className='text-center'>{formatearFecha(publicacion?.fechacreacion)}</TableCell>
+                                            <TableCell align="left" className='text-center'>{material?.id}</TableCell>
+                                            <TableCell align="left" className='text-center'>{material?.nombre}</TableCell>
+                                            <TableCell align="left" className='text-center'>{material?.categoriamaterial?.nombrecategoriamaterial}</TableCell>
+                                            {/* <TableCell align="left" className='text-center'>{formatearFecha(publicacion?.fechadesaparicion)}</TableCell> */}
+                                            <TableCell align="left" className='text-center'>{formatearFecha(material?.fechacreacion)}</TableCell>
                                             <TableCell align="center" className='text-center'>
                                                 <div className='text-xs text-blueBorder border border-blueBorder px-0.5 py-1 bg-blueInside rounded-sm'>
-                                                    {publicacion?.estado?.nombreestado}
+                                                    {material?.estado?.nombreestado}
                                                 </div>
                                             </TableCell>
                                             <TableCell align="left">
                                                 <button
-                                                    onClick={(event) => handleClick(event, publicacion?.id)}
+                                                    onClick={(event) => handleClick(event, material?.id, material?.estado?.id)}
                                                 >
                                                     <IoMdMore size={20} />
                                                 </button>
@@ -300,9 +296,9 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
                                                         }
                                                     }}
                                                 >
-                                                    <MenuItem onClick={handleEdit}>Editar Publicación</MenuItem>
-                                                    <MenuItem onClick={handleView}>Ver Publicación</MenuItem>
-                                                    <MenuItem onClick={handleDeactivate}>Desactivar Publicación</MenuItem>
+                                                    <MenuItem onClick={handleView}>Ver Detalles del Material</MenuItem>
+                                                    <MenuItem onClick={handleEdit}>Editar Material</MenuItem>
+                                                    <MenuItem onClick={handleDeactivate}>{(estadoMaterial === 1) ? "Desactivar Material" : "Activar Material"}</MenuItem>
                                                 </Menu>
                                             </TableCell>
                                         </TableRow>
@@ -316,7 +312,7 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
                                 <TablePagination
                                     rowsPerPageOptions={[10,20,50]}
                                     colSpan={3}
-                                    count={data.totalPublicaciones}
+                                    count={data.totalMateriales}
                                     rowsPerPage={limit}
                                     page={page-1}
                                     slotProps={{

@@ -85,3 +85,17 @@ export const formatearFecha = (fecha) => {
     const date = new Date(fecha);
     return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 }
+
+export const crearComentario = async (data,token) => {
+    try {
+        const response = await axios.post(apiRoutes.crearComentarioPublicaciones(), data,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
