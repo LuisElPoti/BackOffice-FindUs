@@ -48,10 +48,11 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
     const [selectedUser, setSelectedUser] = useState(null);
     const [selectedUserID, setSelectedUserID] = useState(null);
     const [openModal, setOpenModal] = useState(false);
+    const [openModalVer, setOpenModalVer] = useState(false);
 
 
     // Funcion para modal editar
-    const handleOpenModal = async (id) => {
+    const handleOpenModal = async (id, opcion) => {
         setLoading(true);
         setMenuAnchor(null);
         try{
@@ -59,7 +60,11 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
             const response = await obtenerUsuarioByID(parseInt(id));
             setSelectedUser(response.data);
             console.log("USUARIO",response.data);
-            setOpenModal(true);
+            if(opcion === 1){
+                setOpenModal(true);
+            } else {
+                setOpenModalVer(true);
+            }
         } catch (error) {
             console.error("Error al obtener usuario", error);
         } finally {
@@ -69,6 +74,7 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
 
     const handleCloseModal = () => {
         setOpenModal(false);
+        setOpenModalVer(false);
         setSelectedUser(null);
     }
 
@@ -353,7 +359,14 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
                           open={Boolean(menuAnchor)}
                           onClose={handleMenuClose}
                         >
-                          <MenuItem onClick={() => handleOpenModal(selectedUserID)}>
+                          <MenuItem
+                            onClick={() => handleOpenModal(selectedUserID, 2)}
+                          >
+                            Ver
+                          </MenuItem>
+                          <MenuItem
+                            onClick={() => handleOpenModal(selectedUserID, 1)}
+                          >
                             Editar
                           </MenuItem>
                           <MenuItem onClick={handleDeactivateUser}>
@@ -367,15 +380,15 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
               </TableBody>
 
               {/* Modal de edición */}
-              <Modal 
-                open={openModal} 
+              <Modal
+                open={openModal}
                 onClose={handleCloseModal}
                 sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
                 <div className="bg-white p-6 w-[30%] mx-auto mt-20 rounded-lg shadow-lg">
                   {loading ? (
                     <CircularProgress />
@@ -437,6 +450,195 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
                   )}
                 </div>
               </Modal>
+
+              {/* Modal de ver */}
+              <Modal
+                open={openModalVer}
+                onClose={handleCloseModal}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div className="bg-white p-6 w-[90%] max-w-[600px] max-h-[80vh] overflow-auto mx-auto mt-20 rounded-lg shadow-lg">
+                  {loading ? (
+                    <CircularProgress />
+                  ) : (
+                    <div className="flex flex-col gap-4">
+                      {/* Imagen de perfil */}
+                      <div className="flex justify-center mb-4">
+                        <img
+                          src={selectedUser?.urlfotoperfil}
+                          alt="Foto de Perfil"
+                          className="w-24 h-24 rounded-full border-2 border-gray-300"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <TextField
+                          label="ID"
+                          value={selectedUser?.id}
+                          variant="outlined"
+                          fullWidth
+                          slotProps={{
+                            input: {
+                              readOnly: true,
+                            },
+                          }}
+                        />
+                        <TextField
+                          label="Nombre"
+                          value={selectedUser?.nombre}
+                          variant="outlined"
+                          fullWidth
+                          slotProps={{
+                            input: {
+                              readOnly: true,
+                            },
+                          }}
+                        />
+                        <TextField
+                          label="Apellido"
+                          value={selectedUser?.apellido}
+                          variant="outlined"
+                          fullWidth
+                          slotProps={{
+                            input: {
+                              readOnly: true,
+                            },
+                          }}
+                        />
+                        <TextField
+                          label="Email"
+                          value={selectedUser?.email}
+                          variant="outlined"
+                          fullWidth
+                          slotProps={{
+                            input: {
+                              readOnly: true,
+                            },
+                          }}
+                        />
+                        <TextField
+                          label="Fecha de Nacimiento"
+                          value={new Date(
+                            selectedUser?.fechanacimiento
+                          ).toLocaleDateString()}
+                          variant="outlined"
+                          fullWidth
+                          slotProps={{
+                            input: {
+                              readOnly: true,
+                            },
+                          }}
+                        />
+                        <TextField
+                          label="Número de Teléfono"
+                          value={selectedUser?.numerotelefono}
+                          variant="outlined"
+                          fullWidth
+                          slotProps={{
+                            input: {
+                              readOnly: true,
+                            },
+                          }}
+                        />
+                        <TextField
+                          label="Verificado"
+                          value={selectedUser?.verificado ? "Sí" : "No"}
+                          variant="outlined"
+                          fullWidth
+                          slotProps={{
+                            input: {
+                              readOnly: true,
+                            },
+                          }}
+                        />
+                        <TextField
+                          label="Código de Verificación"
+                          value={selectedUser?.codigoverificacionusuario}
+                          variant="outlined"
+                          fullWidth
+                          slotProps={{
+                            input: {
+                              readOnly: true,
+                            },
+                          }}
+                        />
+                        <TextField
+                          label="Tipo de Documento"
+                          value={selectedUser?.idtipodocumento} // Cambia según la lógica de obtención del nombre
+                          variant="outlined"
+                          fullWidth
+                          slotProps={{
+                            input: {
+                              readOnly: true,
+                            },
+                          }}
+                        />
+                        <TextField
+                          label="Número de Documento"
+                          value={selectedUser?.numerodocumento}
+                          variant="outlined"
+                          fullWidth
+                          slotProps={{
+                            input: {
+                              readOnly: true,
+                            },
+                          }}
+                        />
+                        <TextField
+                          label="Rol"
+                          value={selectedUser?.rol?.nombrerol}
+                          variant="outlined"
+                          fullWidth
+                          slotProps={{
+                            input: {
+                              readOnly: true,
+                            },
+                          }}
+                        />
+                        <TextField
+                          label="Estado"
+                          value={selectedUser?.estado?.nombreestado}
+                          variant="outlined"
+                          fullWidth
+                          slotProps={{
+                            input: {
+                              readOnly: true,
+                            },
+                          }}
+                        />
+                        <TextField
+                          label="Fecha de Creación"
+                          value={new Date(
+                            selectedUser?.fechacreacion
+                          ).toLocaleDateString()}
+                          variant="outlined"
+                          fullWidth
+                          slotProps={{
+                            input: {
+                              readOnly: true,
+                            },
+                          }}
+                        />
+                      </div>
+
+                      <div className="flex justify-end gap-4 mt-4">
+                        <button
+                          type="button"
+                          onClick={handleCloseModal}
+                          className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md"
+                        >
+                          Cerrar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Modal>
+
               <TableFooter>
                 <TableRow>
                   <TablePagination
