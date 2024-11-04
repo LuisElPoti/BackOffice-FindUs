@@ -76,7 +76,7 @@ export default function ModalAdentroPublicaciones({ open, handleClose, idPublica
         ubicacion_longitud: Yup.number().required("Este campo es obligatorio"),
         imageData: Yup.object().required(),
       });
-    
+
 
       const formik = useFormik({
         initialValues: {
@@ -89,7 +89,7 @@ export default function ModalAdentroPublicaciones({ open, handleClose, idPublica
         },
         validationSchema: validationSchema,
         onSubmit: async (values) => {
-        
+
           console.log(values)
           setSendingData(true);
           values.ubicacion_latitud = values.ubicacion_latitud.toString();
@@ -134,13 +134,13 @@ export default function ModalAdentroPublicaciones({ open, handleClose, idPublica
         }
       }
       });
-    
+
       useEffect(() => {
         console.log("FORMIK VALES",formik);
     }, [formik?.values]);
 
     useEffect(() => {
-        formik.validateForm();  
+        formik.validateForm();
     }, [formik?.values?.ubicacion_latitud, formik?.values?.ubicacion_longitud]);
 
 
@@ -244,122 +244,139 @@ export default function ModalAdentroPublicaciones({ open, handleClose, idPublica
                                         descripcionAvistamiento={avistamiento.detalles}
                                         fotoAvistamiento={avistamiento.fotosavistamiento[0]?.urlarchivo}
                                         cantItems={publicacion?.avistamiento.length}
+                                        publicacionActivada={publicacion?.estado?.id == 1}
                                         numItems={index}
                                         avistamiento={avistamiento}
                                         idPublicacion={publicacion?.id}
                                         setActualizarAvistamientos={setActualizarAvistamientos}
                                     />
                                 ))
-                                
+
                             ):(
                                 <h2 className="text-lg font-bold text-[#233E58] text-center mb-2">No hay avistamientos</h2>
                             )}
                         </div>
                     </div>
+                    {publicacion?.estado?.id == 1 ? (
+                        <div
+                            className="flex-1 flex-col ml-5 h-full rounded-md bg-[#c5d7e8a5] overflow-auto  py-2 px-1 scrollbar-custom"
+                        >
+                            <h2 className="text-2xl font-bold text-[#233E58] text-center">Reportar Avistamiento de {publicacion?.nombredesaparecido}</h2>
 
-                    <div
-                        className="flex-1 flex-col ml-5 h-full rounded-md bg-[#c5d7e8a5] overflow-auto  py-2 px-1 scrollbar-custom"
-                    >
-                        <h2 className="text-2xl font-bold text-[#233E58] text-center">Reportar Avistamiento de {publicacion?.nombredesaparecido}</h2>
+                            <div className="mb-4 mx-auto mt-[2vh] ml-8 ">
+                                <label
+                                    className="block text-md font-bold mb-2"
+                                    htmlFor="name"
+                                >
+                                    Fecha de avistamiento:
+                                </label>
+                                <input
+                                    type="date"
+                                    id="fecha_avistamiento"
+                                    name="fecha_avistamiento"
+                                    value={formik.values.fecha_avistamiento}
+                                    onChange={formik.handleChange}
+                                    max={new Date().toISOString().split("T")[0]}
+                                    className="w-[90%] mx-auto ml-4 px-3 py-2 border border-gray-300 rounded"
+                                />
+                            </div>
 
-                        <div className="mb-4 mx-auto mt-[2vh] ml-8 ">
-                            <label
-                                className="block text-md font-bold mb-2"
-                                htmlFor="name"
-                            >
-                                Fecha de avistamiento:
-                            </label>
-                            <input
-                                type="date"
-                                id="fecha_avistamiento"
-                                name="fecha_avistamiento"
-                                value={formik.values.fecha_avistamiento}
-                                onChange={formik.handleChange}
-                                max={new Date().toISOString().split("T")[0]}
-                                className="w-[90%] mx-auto ml-4 px-3 py-2 border border-gray-300 rounded"
-                            />
+                            <div className="mb-4 mx-auto mt-[2vh] ml-8 ">
+                                <label
+                                    className="block text-md font-bold mb-2"
+                                    htmlFor="name"
+                                >
+                                    Descripción del avistamiento:
+                                </label>
+                                <textarea
+                                    id="detalles"
+                                    rows={4}
+                                    name="detalles"
+                                    value={formik.values.detalles}
+                                    onChange={formik.handleChange}
+                                    className="w-[90%] mx-auto ml-4 px-3 py-2 border border-gray-300 rounded"
+                                />
+                            </div>
+
+                            <div className="mb-4 mx-auto mt-[2vh] ml-8 ">
+                                <label
+                                    className="block text-md font-bold mb-2"
+                                    htmlFor="name"
+                                >
+                                    Foto del avistamiento:
+                                </label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    id="nombre_desaparecido"
+                                    rows={4}
+                                    onChange={handleFileInputChange}
+                                    name="nombre_desaparecido"
+                                    className="w-[90%] mx-auto ml-4 px-3 py-2 border bg-white border-gray-300 rounded"
+                                />
+                            </div>
+
+                            <div className="mb-4 mx-auto mt-[2vh]">
+                                <label
+                                    className="block text-md font-bold mb-2 ml-8"
+                                    htmlFor="name"
+                                >
+                                    Ubicación del avistamiento:
+                                </label>
+
+                                <button
+                                    className="bg-[#62c1c6] text-white rounded-md p-2 mt-[3%] flex items-center justify-center h-[14%] w-[80%] mx-auto"
+                                    onClick={handleOpenMap}
+                                >
+                                    Seleccionar ubicación en el mapa
+                                </button>
+
+                                {formik?.values?.ubicacion_latitud && formik?.values?.ubicacion_longitud && (
+                                    <div>
+                                        <p className="text-sm font-bold text-[#233E58] mt-2 ml-8">Coordenadas Seleccionadas</p>
+                                        <p className="text-sm font-bold text-[#233E58] mt-2 ml-12"><strong>Latitud:</strong> {formik?.values?.ubicacion_latitud}</p>
+                                        <p className="text-sm font-bold text-[#233E58] mt-2 ml-12"><strong>Longitud:</strong> {formik?.values?.ubicacion_longitud}</p>
+                                    </div>
+
+                                )}
+                            </div>
+
+                            <div className="flex mx-auto justify-center items-center mt-auto w-full py-2">
+                                <button
+                                    className=" text-white rounded-md p-2  items-center justify-center h-[14%]"//bg-[#233E58]
+                                    onClick={formik?.handleSubmit}
+                                    disabled={sendingData || !formik.isValid}
+                                    style={{ cursor: sendingData || !formik.isValid ? "not-allowed" : "pointer", backgroundColor: sendingData || !formik.isValid ? "#95c7f7" : "#233E58" }}
+                                >
+                                    Reportar Avistamiento
+                                </button>
+
+                                <button
+                                    className="bg-[#c15250] text-white rounded-md p-2 ml-2 items-center justify-center h-[14%]"
+                                    onClick={handleCloseFinal}
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+
+                        </div>
+                    ) : (
+                        <div
+                            className="flex-1 flex-col ml-5 h-full rounded-md bg-[#c5d7e8a5] overflow-auto  py-2 px-1 scrollbar-custom"
+                        >
+                            <h2 className="text-2xl font-bold text-[#233E58] text-center">Reportar Avistamiento de {publicacion?.nombredesaparecido}</h2>
+                            <div className="flex flex-col w-full h-full justify-center items-center align-middle content-center">
+                                <h2 className="text-lg font-bold text-[#233E58] text-center mb-2">No puedes reportar avistamientos de una publicación inactiva</h2>
+                                <GiCancel
+                                    size={100}
+                                    color="#c15250"
+                                />
+                            </div>
                         </div>
 
-                        <div className="mb-4 mx-auto mt-[2vh] ml-8 ">
-                            <label
-                                className="block text-md font-bold mb-2"
-                                htmlFor="name"
-                            >
-                                Descripción del avistamiento:
-                            </label>
-                            <textarea
-                                id="detalles"
-                                rows={4}
-                                name="detalles"
-                                value={formik.values.detalles}
-                                onChange={formik.handleChange}
-                                className="w-[90%] mx-auto ml-4 px-3 py-2 border border-gray-300 rounded"
-                            />
-                        </div>
+                        )}
+                    </div>
 
-                        <div className="mb-4 mx-auto mt-[2vh] ml-8 ">
-                            <label
-                                className="block text-md font-bold mb-2"
-                                htmlFor="name"
-                            >
-                                Foto del avistamiento:
-                            </label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                id="nombre_desaparecido"
-                                rows={4}
-                                onChange={handleFileInputChange}
-                                name="nombre_desaparecido"
-                                className="w-[90%] mx-auto ml-4 px-3 py-2 border bg-white border-gray-300 rounded"
-                            />
-                        </div>
-
-                        <div className="mb-4 mx-auto mt-[2vh]">
-                            <label
-                                className="block text-md font-bold mb-2 ml-8"
-                                htmlFor="name"
-                            >
-                                Ubicación del avistamiento:
-                            </label>
-
-                            <button
-                                className="bg-[#62c1c6] text-white rounded-md p-2 mt-[3%] flex items-center justify-center h-[14%] w-[80%] mx-auto"
-                                onClick={handleOpenMap}
-                            >
-                                Seleccionar ubicación en el mapa
-                            </button>
-
-                            {formik?.values?.ubicacion_latitud && formik?.values?.ubicacion_longitud && (
-                                <div>
-                                    <p className="text-sm font-bold text-[#233E58] mt-2 ml-8">Coordenadas Seleccionadas</p>
-                                    <p className="text-sm font-bold text-[#233E58] mt-2 ml-12"><strong>Latitud:</strong> {formik?.values?.ubicacion_latitud}</p>
-                                    <p className="text-sm font-bold text-[#233E58] mt-2 ml-12"><strong>Longitud:</strong> {formik?.values?.ubicacion_longitud}</p>
-                                </div>
-
-                            )}
-                        </div>
-
-                        <div className="flex mx-auto justify-center items-center mt-auto w-full py-2">
-                            <button
-                                className=" text-white rounded-md p-2  items-center justify-center h-[14%]"//bg-[#233E58]
-                                onClick={formik?.handleSubmit}
-                                disabled={sendingData || !formik.isValid}
-                                style={{ cursor: sendingData || !formik.isValid ? "not-allowed" : "pointer", backgroundColor: sendingData || !formik.isValid ? "#95c7f7" : "#233E58" }}
-                            >
-                                Reportar Avistamiento
-                            </button>
-
-                            <button
-                                className="bg-[#c15250] text-white rounded-md p-2 ml-2 items-center justify-center h-[14%]"
-                                onClick={handleCloseFinal}
-                            >
-                                Cancelar
-                            </button>
-                        </div>
-
-                </div>
-                </div>
 
                 {/*Comentarios*/}
 
@@ -388,14 +405,14 @@ export default function ModalAdentroPublicaciones({ open, handleClose, idPublica
 
                     </div>
                 </div>
-                <ModalMapa 
-                    latitud_value={formik?.values?.ubicacion_latitud} 
+                <ModalMapa
+                    latitud_value={formik?.values?.ubicacion_latitud}
                     longitud_value={formik?.values?.ubicacion_longitud}
                     latitud_name="ubicacion_latitud"
                     longitud_name="ubicacion_longitud"
                     setFieldValue={formik.setFieldValue}
-                    open={openMap} 
-                    handleClose={handleCloseMap} 
+                    open={openMap}
+                    handleClose={handleCloseMap}
                 />
             </div>
         </Modal>
@@ -482,7 +499,7 @@ function HacerComentario({idPublicacion, publicacion, setPublicacion}){
                 console.log("Comentario creado correctamente: ", response.data);
                 setPublicacion({...publicacion, comentario: [response.data, ...publicacion.comentario]});
                 setComentario("");
-                
+
             }else{
                 console.log("Error al crear el comentario: ", response.data.message);
             }
@@ -509,12 +526,12 @@ function HacerComentario({idPublicacion, publicacion, setPublicacion}){
                         value={comentario}
                         onChange={(e) => setComentario(e.target.value)}
                     />
-                    <button 
+                    <button
                         className="text-white rounded-md p-2  items-center justify-center ml-[2%] w-[15%]  mt-[2vh]" //bg-[#233E58]
                         onClick={() => handlePublicarComentario(comentario,idPublicacion)}
                         disabled={comentario === "" || mandandoComentario}
                         style={{cursor: comentario === "" || mandandoComentario ? "not-allowed" : "pointer", backgroundColor: comentario === "" || mandandoComentario ? "#c5d7e8" : "#233E58"}}
-                    >   
+                    >
                         {loading ? "Publicando..." : "Comentar"}
                     </button>
                 </div>
@@ -525,7 +542,7 @@ function HacerComentario({idPublicacion, publicacion, setPublicacion}){
     )
 }
 
-function AvistamientoCard({fotoAvistamiento, lugarAvistamiento, descripcionAvistamiento, quienloVio, cantItems,numItems,avistamiento, setActualizarAvistamientos, idPublicacion}){
+function AvistamientoCard({fotoAvistamiento, lugarAvistamiento, descripcionAvistamiento, quienloVio, cantItems,numItems,avistamiento, setActualizarAvistamientos, idPublicacion, publicacionActivada}){
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedAvistamiento, setSelectedAvistamiento] = useState({idAvistamiento: null, idEstado: null, nombre: null, verificado: null});
     const [openModalDesAct, setOpenModalDesAct] = useState({abrir: false, idAvistamiento: null, activado: null, nombreAvistamiento: null});
@@ -553,8 +570,8 @@ function AvistamientoCard({fotoAvistamiento, lugarAvistamiento, descripcionAvist
     const handleDeactivate = () => {
         console.log('Desactivando publicación:', selectedAvistamiento);
         setOpenModalDesAct({
-            abrir: true, 
-            idAvistamiento: selectedAvistamiento?.idAvistamiento, 
+            abrir: true,
+            idAvistamiento: selectedAvistamiento?.idAvistamiento,
             activado: selectedAvistamiento?.idEstado == 1,
             nombreAvistamiento: ((numItems) == 0) ? "Último Avistamiento" : `Avistamiento #${(cantItems - numItems)}`
         });
@@ -564,8 +581,8 @@ function AvistamientoCard({fotoAvistamiento, lugarAvistamiento, descripcionAvist
     const handleVerify = () => {
         console.log('Verificando publicación:', selectedAvistamiento);
         setOpenModalVerificar({
-            abrir: true, 
-            idAvistamiento: selectedAvistamiento?.idAvistamiento, 
+            abrir: true,
+            idAvistamiento: selectedAvistamiento?.idAvistamiento,
             activado: selectedAvistamiento?.idEstado == 1,
             verificado: selectedAvistamiento?.verificado,
             nombreAvistamiento: ((numItems) == 0) ? "Último Avistamiento" : `Avistamiento #${(cantItems - numItems)}`
@@ -619,11 +636,20 @@ function AvistamientoCard({fotoAvistamiento, lugarAvistamiento, descripcionAvist
                         }
                     }}
                 >
-                    <MenuItem onClick={handleEdit}>Editar Avistamiento</MenuItem>
-                    <MenuItem onClick={handleDeactivate}>{(selectedAvistamiento?.idEstado == 1 ) ? "Desactivar Avistamiento" : "Activar Avistamiento"}</MenuItem>
-                    {(!selectedAvistamiento?.verificado && selectedAvistamiento?.verificado !== null && selectedAvistamiento?.idEstado === 1) && (
-                        <MenuItem onClick={handleVerify}>Verificar Publicacion</MenuItem>
-                    )}
+                    {publicacionActivada  ?  (
+                        <>
+                        { selectedAvistamiento?.idEstado === 1 && (
+                            <MenuItem onClick={handleEdit}>Editar Avistamiento</MenuItem>
+                        )}
+                            <MenuItem onClick={handleDeactivate}>{(selectedAvistamiento?.idEstado == 1 ) ? "Desactivar Avistamiento" : "Activar Avistamiento"}</MenuItem>
+                            {(!selectedAvistamiento?.verificado && selectedAvistamiento?.verificado !== null && selectedAvistamiento?.idEstado === 1) && (
+                                <MenuItem onClick={handleVerify}>Verificar Publicacion</MenuItem>
+                            )}
+                        </>
+                ):
+                 (
+                    <MenuItem onClick={handleClose}>Publicacion o Avistamiento No Activa. No se puede realizar ninguna acción</MenuItem>
+                )}
                 </Menu>
             </div>
         <div className="flex flex-row justify-between items-center">
@@ -694,9 +720,9 @@ function ModalCambiarEstadoAvistamiento({open, handleClose, activado, nombreAvis
         );
       };
 
-      
+
     const handleConfirm = () => {
-        
+
         if(activado){
             showToast(desactivarAvistamiento(idAvistamiento), "Desactivando avistamiento...").then((response) => {
                 handleClose();
@@ -756,7 +782,7 @@ function ModalCambiarEstadoAvistamiento({open, handleClose, activado, nombreAvis
                         Cancelar
                     </button>
                 </div>
-            </div>   
+            </div>
         </Modal>
     )
 }
@@ -790,7 +816,7 @@ function ModalVerificarAvistamiento({open, handleClose, activado, nombreAvistami
         });
     }
 
-              
+
     return (
         <Modal open={open} onClose={handleClose} className='content-center'>
             <div
@@ -820,7 +846,7 @@ function ModalVerificarAvistamiento({open, handleClose, activado, nombreAvistami
                         Cancelar
                     </button>
                 </div>
-            </div>   
+            </div>
         </Modal>
     )
 }
@@ -984,11 +1010,11 @@ function ModalEditarAvistamiento({open, handleClose, avistamiento, nombreAvistam
                         className='text-white font-bold py-2 px-4 rounded-md mx-2'
                         onClick={formikEditar?.handleSubmit}
                         disabled={sendingData || !formikEditar.isValid || !formikEditar.dirty}
-                        style={{ 
+                        style={{
                             cursor: sendingData || !formikEditar.isValid || !formikEditar.dirty ? "not-allowed" : "pointer",
                             backgroundColor: sendingData || !formikEditar.isValid || !formikEditar.dirty ? "#95c7f7" : "#233E58"
                         }}
-                        
+
                     >
                         Confirmar
                     </button>

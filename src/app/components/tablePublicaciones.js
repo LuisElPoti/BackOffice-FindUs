@@ -363,7 +363,9 @@ export default function TablaPublicaciones({ headers, onRowClick,className, hand
                                                     }}
                                                 >
                                                     <MenuItem onClick={handleView}>Ver Publicación</MenuItem>
-                                                    <MenuItem onClick={handleEdit}>Editar Publicación</MenuItem>
+                                                    {selectedPublicacion?.idEstado == 1 &&(
+                                                        <MenuItem onClick={handleEdit}>Editar Publicación</MenuItem>
+                                                    )}
                                                     <MenuItem onClick={handleDeactivate}>{(selectedPublicacion?.idEstado == 1 ) ? "Desactivar Publicación" : "Activar Publicación"}</MenuItem>
                                                     {(!selectedPublicacion?.verificado && selectedPublicacion?.verificado !== null && selectedPublicacion?.idEstado === 1) && (
                                                         <MenuItem onClick={handleVerify}>Verificar Publicacion</MenuItem>
