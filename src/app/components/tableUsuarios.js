@@ -369,9 +369,9 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
                           >
                             Editar
                           </MenuItem>
-                          <MenuItem onClick={handleDeactivateUser}>
+                          {/* <MenuItem onClick={handleDeactivateUser}>
                             Desactivar
-                          </MenuItem>
+                          </MenuItem> */}
                         </Menu>
                       </TableCell>
                     </TableRow>
