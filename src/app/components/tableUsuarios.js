@@ -46,6 +46,7 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
     const [filtersCleaned, setFiltersCleaned] = useState(false);
     const [menuAnchor, setMenuAnchor] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedUserID, setSelectedUserID] = useState(null);
     const [openModal, setOpenModal] = useState(false);
 
 
@@ -167,7 +168,7 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
 
     const handleMenuOpen = (event, userId) => {
       setMenuAnchor(event.currentTarget);
-      setSelectedUser(userId);
+      setSelectedUserID(userId);
     };
 
     const handleMenuClose = () => {
@@ -352,7 +353,7 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
                           open={Boolean(menuAnchor)}
                           onClose={handleMenuClose}
                         >
-                          <MenuItem onClick={() => handleOpenModal(usuario.id)}>
+                          <MenuItem onClick={() => handleOpenModal(selectedUserID)}>
                             Editar
                           </MenuItem>
                           <MenuItem onClick={handleDeactivateUser}>
