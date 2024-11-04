@@ -32,3 +32,33 @@ export const obtenerMaterialEducativoByID = async (id) => {
         return error.response;
     }
 }
+
+export const desactivarRecursoEducativo = async (id) => {
+    try {
+        const response = await axios.put(apiRoutes.desactivarRecursoEducativo(id));
+        return response;
+    } catch (error) {
+        console.log(error);
+        return error.response;
+    }
+}
+
+export const activarRecursoEducativo = async (id) => {
+    try {
+        const response = await axios.put(apiRoutes.activarRecursoEducativo(id));
+        return response;
+    } catch (error) {
+        console.log(error);
+        return error.response;
+    }
+}
+
+export const editarRecursoEducativo = async (id, values) => {
+    try {
+        const response = await axios.put(apiRoutes.editarRecursoEducativo(id), values);
+        return response;
+    } catch (error) {
+        console.log(error);
+        return error.response;
+    }
+}

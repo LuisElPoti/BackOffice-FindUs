@@ -99,3 +99,54 @@ export const crearComentario = async (data,token) => {
         return error.response;
     }
 }
+
+export const obtenerInformacionEditarPublicacionBO = async (id) => {
+    try {
+        const response = await axios.get(apiRoutes.obtenerInformacionEditarPublicacionBO(id));
+        return response;
+    } catch (error) {
+        return error.response
+    }
+}
+
+export const actualizarPublicacionBO = async (id, data, token) => {
+    try {
+        const response = await axios.put(apiRoutes.actualizarPublicacionBO(id), data,);
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
+// {
+//     headers: {
+//         Authorization: `Bearer ${token}`
+//     }
+// }
+
+export const activarPublicacion = async (id) => {
+    try {
+        const response = await axios.put(apiRoutes.activarPublicacion(id));
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
+export const desactivarPublicacion = async (id) => {
+    try {
+        const response = await axios.put(apiRoutes.desactivarPublicacion(id));
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
+export const verificarPublicacion = async (id) => {
+    try {
+        const response = await axios.put(apiRoutes.verificarPublicacion(id));
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}

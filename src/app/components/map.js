@@ -37,7 +37,7 @@ export default function Mapa({ lat_value = undefined, long_value = undefined, lo
 
         // Si se proporcionan coordenadas externas, úsalas como posición seleccionada
         if (lat_value !== undefined && long_value !== undefined) {
-            const providedPos = { lat: lat_value, lng: long_value };
+            const providedPos = { lat: parseFloat(lat_value), lng: parseFloat(long_value) };
             setSelectedPosition(providedPos);
             setMapCenter(providedPos); // Centra el mapa en la ubicación proporcionada
         }
