@@ -15,7 +15,8 @@ const apiRoutes = {
     loginUsuario: () => `${API_BASE_URL}/user/login`,
     verificar_token_valido: () => `${API_BASE_URL}/user/verificar_token_valido`,
     obtenerUsuariosTabla: (page, limit) => `${API_BASE_URL}/user/obtenerUsuariosTabla/${page}/${limit}`,
-
+    obtenerUsuarioByID: (id) => `${API_BASE_URL}/user/${id}`,
+    actualizarAdminAUsuario: (id) => `${API_BASE_URL}/user/admin_update_user/${id}`,
     //Rutas Rol
     obtenerRol: () => `${API_BASE_URL}/roles/obtenerRoles`,
     obtenerInfoBasicaUser : () => `${API_BASE_URL}/user/obtener_info_basica_user`,

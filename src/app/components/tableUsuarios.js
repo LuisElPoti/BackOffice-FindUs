@@ -8,10 +8,14 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { IoMdMore } from "react-icons/io";
 import { useState } from 'react';
-import { obtenerUsuariosTabla } from '../../../services/userService';
+import { obtenerUsuariosTabla, obtenerUsuarioByID, actualizarAdminAUsuario } from '../../../services/userService';
 import { obtenerRoles, obtenerEstadosGeneral } from '../../../services/catalogoServices';
-import { TableFooter, TablePagination, CircularProgress } from '@mui/material';
+import { TableFooter, TablePagination, CircularProgress, Modal, TextField} from '@mui/material';
 import TablePaginationActions from './tableActionsComponent'; 
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { useFormik } from 'formik';
+
 
 function createData(ID, nombre, fechaDesaparicion,fechaPublicacion, estatus) {
     return { ID, nombre, fechaDesaparicion, fechaPublicacion,estatus };
@@ -40,6 +44,59 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
     const [estados, setEstados] = useState([]);
     const [loading, setLoading] = useState(false);
     const [filtersCleaned, setFiltersCleaned] = useState(false);
+    const [menuAnchor, setMenuAnchor] = useState(null);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [openModal, setOpenModal] = useState(false);
+
+
+    // Funcion para modal editar
+    const handleOpenModal = async (id) => {
+        setLoading(true);
+        setMenuAnchor(null);
+        try{
+            console.log("ID",parseInt(id));
+            const response = await obtenerUsuarioByID(parseInt(id));
+            setSelectedUser(response.data);
+            console.log("USUARIO",response.data);
+            setOpenModal(true);
+        } catch (error) {
+            console.error("Error al obtener usuario", error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const handleCloseModal = () => {
+        setOpenModal(false);
+        setSelectedUser(null);
+    }
+
+    // Formik para editar usuario
+    const formik = useFormik({
+        initialValues: {
+            rol: selectedUser?.rol?.id,
+            estado: selectedUser?.estado?.id,
+        },
+        enableReinitialize: true,
+        onSubmit: async (values) => {
+            setLoading(true);
+            try {
+                console.log("ID", parseInt(selectedUser.id));
+                const response = await actualizarAdminAUsuario(parseInt(selectedUser.id), values);
+                console.log("RESPONSE", response);
+                if(response.status === 200){
+                    handleCloseModal();
+                    obtenerData();
+                } else {
+                    console.error("Error al actualizar usuario", response);
+                }
+            } catch (error) {
+                console.error("Error al actualizar usuario", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+    });
 
 
     const formatearFecha = (fecha) => {
@@ -47,22 +104,21 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
         return `${fechaFormatear.getDate()}/${fechaFormatear.getMonth() + 1}/${fechaFormatear.getFullYear()}`;
     }
     
-    const obtenerData = () => {
+    const obtenerData = useCallback(() => {
         setLoading(true);
-        const filtrosSearch = (search && search !== '') ? `&nombreCompleto=${search}` : '';
-        const filtroRol = (rol && rol != "-1") ? `&rol=${rol}` : '';
-        // const filtrosFechaDesde = fechaDesde ? `&fechaDesde=${fechaDesde}` : '';
-        // const filtrosFechaHasta = fechaHasta ? `&fechaHasta=${fechaHasta}` : '';
-        const filtrosEstatus = (estatus && estatus != "-1") ? `&estatus=${estatus}` : '';
+        const filtrosSearch = search ? `&nombreCompleto=${search}` : '';
+        const filtroRol = rol !== "-1" ? `&rol=${rol}` : '';
+        const filtrosEstatus = estatus !== "-1" ? `&estatus=${estatus}` : '';
         const filtros = `${filtrosSearch}${filtroRol}${filtrosEstatus}`;
-        obtenerUsuariosTabla(page, limit, filtros).then((response) => {
-            console.log(response.data);
-            setData(response.data);
-            setLoading(false);
-        }).catch((error) => {
-            console.log(error);
-        });
-    };
+
+        obtenerUsuariosTabla(page, limit, filtros)
+            .then((response) => {
+                setData(response.data);
+            })
+            .catch((error) => console.log(error))
+            .finally(() => setLoading(false));
+    }, [search, rol, estatus, page, limit]);
+
 
     const obtenerEstados = () => {
         obtenerEstadosGeneral().then((response) => {
@@ -102,26 +158,28 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
 
     useEffect(() => {
         obtenerData();
-    }, [page, limit, search, rol, estatus]);
+    }, [obtenerData]);
 
     useEffect(() => {
         obtenerEstados();
-    }, []);
-
-    useEffect(() => {
         obtenerRol();
     }, []);
 
-    useEffect(() => {
-        console.log("Data", data);
-    }
-    , [data]);
+    const handleMenuOpen = (event, userId) => {
+      setMenuAnchor(event.currentTarget);
+      setSelectedUser(userId);
+    };
 
+    const handleMenuClose = () => {
+      setMenuAnchor(null);
+      setSelectedUser(null);
+    };
 
-    useEffect(() => {
-        console.log("Limit", limit);
-    }
-    , [limit]);
+    const handleDeactivateUser = () => {
+      console.log(`Desactivar usuario ${selectedUser}`);
+      handleMenuClose();
+    };
+
     return (
       <>
         <div className="flex items-center gap-4 w-[95%] mx-auto bg-white rounded-lg p-4 shadow-md mb-4">
@@ -150,18 +208,24 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
             </button>
           </div>
 
-            {/* Selector de rol */}
-            <div className="flex items-center bg-[#f0f0f0] rounded-md p-2  w-auto">
-                <label className="text-sm text-gray-500">Rol:</label>
-                <select value={rol} onChange={(e) => setRol(e.target.value)} className="bg-transparent focus:outline-none px-4 w-full text-sm">
-                    <option value="-1">Todos</option>
-                    {roles?.map((rol) => (
-                        <option key={rol.id.toString()} value={rol.id}>{rol.nombrerol}</option>
-                    ))}
-                    {/* <option value="ACTIVO">Activo</option>
+          {/* Selector de rol */}
+          <div className="flex items-center bg-[#f0f0f0] rounded-md p-2  w-auto">
+            <label className="text-sm text-gray-500">Rol:</label>
+            <select
+              value={rol}
+              onChange={(e) => setRol(e.target.value)}
+              className="bg-transparent focus:outline-none px-4 w-full text-sm"
+            >
+              <option value="-1">Todos</option>
+              {roles?.map((rol) => (
+                <option key={rol.id.toString()} value={rol.id}>
+                  {rol.nombrerol}
+                </option>
+              ))}
+              {/* <option value="ACTIVO">Activo</option>
                     <option value="INACTIVO">Inactivo</option> */}
-                </select>
-            </div>
+            </select>
+          </div>
 
           {/* Selector de estatus*/}
           <div className="flex items-center bg-[#f0f0f0] rounded-md p-2  w-auto">
@@ -258,8 +322,6 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
                         "&:last-child td, &:last-child th": { border: 0 },
                         cursor: "pointer",
                       }}
-                      onRowClick={() => onRowClick(usuario?.id)} // Trigger onRowClick when row is clicked
-                    //   onDoubleClick={() => onRowClick(publicacion?.id)} // Trigger onRowClick when row is double clicked
                     >
                       <TableCell align="left" className="text-center">
                         {usuario?.id}
@@ -282,16 +344,98 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
                         </div>
                       </TableCell>
                       <TableCell align="left">
-                        <button
-                          onClick={() => console.log("More button clicked")}
-                        >
+                        <button onClick={(e) => handleMenuOpen(e, usuario?.id)}>
                           <IoMdMore size={20} />
                         </button>
+                        <Menu
+                          anchorEl={menuAnchor}
+                          open={Boolean(menuAnchor)}
+                          onClose={handleMenuClose}
+                        >
+                          <MenuItem onClick={() => handleOpenModal(usuario.id)}>
+                            Editar
+                          </MenuItem>
+                          <MenuItem onClick={handleDeactivateUser}>
+                            Desactivar
+                          </MenuItem>
+                        </Menu>
                       </TableCell>
                     </TableRow>
                   ))
                 )}
               </TableBody>
+
+              {/* Modal de edición */}
+              <Modal 
+                open={openModal} 
+                onClose={handleCloseModal}
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                <div className="bg-white p-6 w-[30%] mx-auto mt-20 rounded-lg shadow-lg">
+                  {loading ? (
+                    <CircularProgress />
+                  ) : (
+                    <form
+                      onSubmit={formik.handleSubmit}
+                      className="flex flex-col gap-6"
+                    >
+                      <TextField
+                        id="rol"
+                        name="rol"
+                        label="Rol"
+                        select
+                        value={formik.values.rol || selectedUser?.rol}
+                        onChange={formik.handleChange}
+                        variant="outlined"
+                        fullWidth
+                      >
+                        {roles?.map((rol) => (
+                          <MenuItem key={rol.id} value={rol.id}>
+                            {rol.nombrerol}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+
+                      <TextField
+                        id="estado"
+                        name="estado"
+                        label="Estado"
+                        select
+                        value={formik.values.estado || selectedUser?.estado}
+                        onChange={formik.handleChange}
+                        variant="outlined"
+                        fullWidth
+                      >
+                        {estados?.map((estado) => (
+                          <MenuItem key={estado.id} value={estado.id}>
+                            {estado.nombreestado}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+
+                      <div className="flex justify-end gap-4">
+                        <button
+                          type="button"
+                          onClick={handleCloseModal}
+                          className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="submit"
+                          className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                        >
+                          Guardar
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              </Modal>
               <TableFooter>
                 <TableRow>
                   <TablePagination

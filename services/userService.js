@@ -109,6 +109,24 @@ const obtenerUsuariosTabla = async (page, limit, filtros) => {
     }
 }
 
+const obtenerUsuarioByID = async (id) => {
+    try {
+        const response = await axios.get(apiRoutes.obtenerUsuarioByID(id));
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
+const actualizarAdminAUsuario = async (id, data) => {
+    try {
+        const response = await axios.put(apiRoutes.actualizarAdminAUsuario(id), data);
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
 //Exportar funciones
 export {
     registrarUsuario,
@@ -119,5 +137,7 @@ export {
     cambiarContrasena,
     login,
     verificarToken,
-    obtenerUsuariosTabla
+    obtenerUsuariosTabla,
+    obtenerUsuarioByID,
+    actualizarAdminAUsuario
 };
