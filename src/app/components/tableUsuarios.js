@@ -15,6 +15,8 @@ import TablePaginationActions from './tableActionsComponent';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { useFormik } from 'formik';
+import { GiCancel } from "react-icons/gi";
+import { MdOutlineVerified } from "react-icons/md";
 
 
 function createData(ID, nombre, fechaDesaparicion,fechaPublicacion, estatus) {
@@ -339,6 +341,20 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
                       <TableCell align="left" className="text-center">
                         {usuario?.apellido}
                       </TableCell>
+                      <TableCell align="left" className='text-center'>{usuario?.verificado ? 
+                          <MdOutlineVerified
+                              style={{ color: '#10B981' }}
+                              size={25}
+                              className='mx-auto'
+                          /> 
+                          : 
+                          <GiCancel
+                              style={{ color: '#EF4444' }}
+                              size={20}
+                              className='mx-auto'
+                          />
+                          }
+                      </TableCell>
                       <TableCell align="left" className="text-center">
                         {usuario?.email}
                       </TableCell>
@@ -346,7 +362,14 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
                         {usuario?.rol.nombrerol}
                       </TableCell>
                       <TableCell align="center" className="text-center">
-                        <div className="text-xs text-blueBorder border border-blueBorder px-0.5 py-1 bg-blueInside rounded-sm">
+                        <div 
+                          className='text-xs border px-0.5 py-1 rounded-sm'
+                          style={{ 
+                                backgroundColor: usuario?.estado?.id == 1 ? '#F3F7FD' : '#ffe2e2' ,
+                                color: usuario?.estado?.id == 1 ? '#2E5AAC' : '#EF4444',
+                                borderColor: usuario?.estado?.id == 1 ? '#2E5AAC' : '#EF4444',
+                          }}
+                        >
                           {usuario?.estado?.nombreestado}
                         </div>
                       </TableCell>
