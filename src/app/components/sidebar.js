@@ -6,8 +6,8 @@ import Avatar from '@mui/material/Avatar';
 import { PiSignOutBold } from "react-icons/pi";
 import { useEffect } from "react";
 import { obtenerInfoBasicaUserBD } from "../../../services/userService";
+import FotoPerfirDefault from "../../../public/assets/profilePicture.svg"
 import { obtenerToken,obtenerFotoPerfil,obtenerNombreUsuario, guardarFotoPerfil,guardarNombreUsuario } from "../../../services/cookiesServices";
-
 
 export default function SideBar({ setSelectedScreen }) {
     const [selected, setSelected] = useState('home');
@@ -110,7 +110,7 @@ export default function SideBar({ setSelectedScreen }) {
             {/* Configuración y perfil */}
             <div className="flex flex-col items-start py-6">
                 <div className="w-full text-customBlue flex items-center pt-6">
-                    <Avatar alt="Rosanna Bautista" src={fotoPerfil || "/assets/profilePicture.png"} className="ml-10" />
+                    <Avatar alt="Rosanna Bautista" src={fotoPerfil || FotoPerfirDefault} className="ml-10" />
                     <div className="ml-3 items-start max-w-[50%]">
                         <h4 className="font-bold text-sm">{obtenerNombreUsuario()||"Rosanna Bautista"}</h4>
                         <h5 className="text-xs">Administrador</h5>
