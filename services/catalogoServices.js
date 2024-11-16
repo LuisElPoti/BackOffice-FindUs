@@ -13,7 +13,28 @@ const obtenerTiposDocumentos = async () => {
     }
 }
 
+const obtenerRoles = async () => {
+    try {
+        const response = await axios.get(apiRoutes.obtenerRol());
+        return response;
+    } catch (error) {
+        console.error("Error al obtener los roles:", error);
+        return error.response ? error.response.data : { status: 500, message: "Error en la conexión" };
+    }
+}
+
+const obtenerEstadosGeneral = async () => {
+    try {
+        const response = await axios.get(apiRoutes.obtenerEstadosGeneral());
+        return response;
+    } catch (error) {
+        console.error("Error al obtener los estados generales:", error);
+        return error.response ? error.response.data : { status: 500, message: "Error en la conexión" };
+    }
+}
 
 module.exports = {
-    obtenerTiposDocumentos
+    obtenerTiposDocumentos,
+    obtenerRoles,
+    obtenerEstadosGeneral
 }

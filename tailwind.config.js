@@ -27,6 +27,9 @@ module.exports = {
         blueOscuro: "#204C6B",
         blueBackground: "#F3F7FD",
     },
+      backgroundImage: {
+        '50-50-vertical': 'linear-gradient(to bottom, #228689 50%, #F3F7FD 50%)', // Degradado con #228689 arriba y #F3F7FD abajo al 50%
+      },
   },
   plugins: [],
 }

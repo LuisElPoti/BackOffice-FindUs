@@ -9,3 +9,21 @@ export const subirArchivo = async (data) => {
         return error.response;
     }
 }
+
+export const actualizarFotoPublicacionBO = async (data) => {
+    try {
+        const response = await axios.put(apiRoutes.actualizarFotoPublicacionBO(), data);
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
+export const actualizarArchivoPubicacionBO = async (id, data) => {
+    try {
+        const response = await axios.put(apiRoutes.actualizarArchivoPubicacionBO(), data);
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}

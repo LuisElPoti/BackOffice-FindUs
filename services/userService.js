@@ -62,6 +62,19 @@ const  cambiarContrasena = async (data, token) => {
     }
 }
 
+export const obtenerInfoBasicaUserBD = async (token) => {
+    try {
+        const response = await axios.get(apiRoutes.obtenerInfoBasicaUser(),{
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
 const  verificarToken = async (token) => {
     try {
         const response = await axios.get(apiRoutes.verificar_token_valido(), {
@@ -85,6 +98,34 @@ const login = async (data) => {
     }
 }
 
+const obtenerUsuariosTabla = async (page, limit, filtros) => {
+    try {
+        const response = await axios.get(`${apiRoutes.obtenerUsuariosTabla(page, limit)}?${filtros}`);
+        console.log(response)
+        return response;
+    } catch (error) {
+        console.log(error);
+        return error.response;
+    }
+}
+
+const obtenerUsuarioByID = async (id) => {
+    try {
+        const response = await axios.get(apiRoutes.obtenerUsuarioByID(id));
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
+const actualizarAdminAUsuario = async (id, data) => {
+    try {
+        const response = await axios.put(apiRoutes.actualizarAdminAUsuario(id), data);
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
 
 //Exportar funciones
 export {
@@ -95,5 +136,8 @@ export {
     verificarCodigoCambioContrasena,
     cambiarContrasena,
     login,
-    verificarToken
+    verificarToken,
+    obtenerUsuariosTabla,
+    obtenerUsuarioByID,
+    actualizarAdminAUsuario
 };
