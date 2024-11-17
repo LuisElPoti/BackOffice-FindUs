@@ -8,7 +8,7 @@ import { FaEye, FaEyeSlash} from "react-icons/fa6";
 import { toast, ToastContainer } from "react-toastify";
 import { login } from "../../../services/userService"; // Importa tu servicio de login
 import "react-toastify/dist/ReactToastify.css";
-import { guardarToken } from "../../../services/cookiesServices";
+import { guardarToken,eliminarDatosUsuario } from "../../../services/cookiesServices";
 
 export default function Login() {
   const router = useRouter();
@@ -34,7 +34,9 @@ export default function Login() {
       login(values)
         .then((response) => {
           if (response.status === 200 && response.data.autenticado) {
+            console.log("LOGIN",response.data);
             toast.success("Inicio de sesión exitoso", {position: "top-center",autoClose: 1000,className: "w-auto"});
+            eliminarDatosUsuario();
             guardarToken(response.data.token);
             
             setTimeout(() => {

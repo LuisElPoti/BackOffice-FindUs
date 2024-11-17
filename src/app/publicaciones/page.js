@@ -14,18 +14,24 @@ import {
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { crearPublicacion } from "../../../services/publicacionServices";
-import { subirArchivo } from "../../../services/uploadFileServices";
+import { crearPublicacion, obtenerInformacionEditarPublicacionBO, actualizarPublicacionBO } from "../../../services/publicacionServices";
+import { subirArchivo, actualizarArchivoPubicacionBO, actualizarFotoPublicacionBO } from "../../../services/uploadFileServices";
 import { obtenerToken } from "../../../services/cookiesServices";
 import Mapa from "@/app/components/map";
 import Popup from "reactjs-popup";
 import 'reactjs-popup/dist/index.css';
-import MyTable from "../components/tablePublicaciones";
 import { FaEdit, FaCheck, FaTimes } from 'react-icons/fa'; // Import icons for edit, check, and cancel
+import TablaPublicaciones from "../components/tablePublicaciones";
+import ModalAdentroPublicaciones from "../components/modalAdentroPublicaciones";
+import { Modal } from "@mui/material";
+import {CircularProgress } from '@mui/material'
 
 export default function Publicaciones() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState({
+    mostrar: false,
+    id: undefined,
+  });
   const [sendingPublicacionData, setSendingPublicacionData] = useState(false);
   const [apiResponse, setApiResponse] = useState(null);
   const [dataTiposDocumentos, setDataTiposDocumentos] = useState([]);
@@ -34,35 +40,98 @@ export default function Publicaciones() {
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [mapPosition, setMapPosition] = useState({ lat: 0, lng: 0 });
   const [mapZoom, setMapZoom] = useState(14); // Establece un zoom inicial. Puede ser un valor entre 0 y 21
-  
+  const [nuevaPublicacion, setNuevaPublicacion] = useState(false);
+
+  //Datos Necesarios de Publicacion a Editar
+  const [editandoPublicacion, setEditandoPublicacion] = useState({editando: false, infoPublicacion: null});
+  const [obteniendoInfoEditar, setObteniendoInfoEditar] = useState(false);
+  const [documentoPublicacion, setDocumentoPublicacion] = useState({fotoDesaparecido: null, documentoPolicia: null});
+  const [abrirPublicacion, setAbrirPublicacion] = useState(false);
+
+  //Datos del formik
+  const [initialValues, setInitialValues] = useState({
+    nombre_desaparecido: "",
+    id_tipo_documento: "",
+    documento_desaparecido: "",
+    telefono: "",
+    fecha_desaparicion: new Date(),
+    descripcion_desaparecido: "",
+    relacion_desaparecido: "",
+    contacto: "",
+    fecha_nacimiento: new Date(),
+    edad: new Date(),
+    ubicacion_latitud: "",
+    ubicacion_longitud: "",
+  });
   
   //AQUI LO PRIMERO DE ROSANNA
-   const [selectedPerson, setSelectedPerson] = useState(null); // State to hold the selected person info
-    const [isEditing, setIsEditing] = useState({}); // To track editable state for each field
+  const [selectedPerson, setSelectedPerson] = useState(null); // State to hold the selected person info
+  const [isEditing, setIsEditing] = useState({}); // To track editable state for each field
 
-    const handleRowClick = (personData) => {
-        setSelectedPerson(personData); // Set the clicked person's data
-    };
+  const handleRowClick = (idPublicacion) => {
+    // setSelectedPerson(personData); // Set the clicked person's data
+    console.log("ID Publicacion ON ROW CLICK: ", idPublicacion);
+    setModalVisible({ mostrar: true, id: idPublicacion });
+  };
 
-    const closePopup = () => {
-        setSelectedPerson(null); // Clear the popup when closed
-    };
+  const closePopup = () => {
+    // setSelectedPerson(null); // Clear the popup when closed
+    setModalVisible(false);
+  };
 
-    const handleEditToggle = (field) => {
-        setIsEditing((prevState) => ({
-            ...prevState,
-            [field]: !prevState[field], // Toggle the edit mode for the field
-        }));
-    };
+  const handleEditToggle = (field) => {
+    setIsEditing((prevState) => ({
+      ...prevState,
+      [field]: !prevState[field], // Toggle the edit mode for the field
+    }));
+  };
 
-    const handleFieldChange = (field, value) => {
-        setSelectedPerson((prevState) => ({
-            ...prevState,
-            [field]: value, // Update the selected person's data
-        }));
-    };
-    //AQUI TERMINA LO DE ROSANNA
-  
+  const handleFieldChange = (field, value) => {
+    setSelectedPerson((prevState) => ({
+      ...prevState,
+      [field]: value, // Update the selected person's data
+    }));
+  };
+  //AQUI TERMINA LO DE ROSANNA
+
+  //
+
+  const handleEditantoPublicacion = (idPublicacion) => {
+    console.log("Editando Publicacion con ID: ", idPublicacion);
+    setObteniendoInfoEditar(true);
+    obtenerInformacionEditarPublicacionBO(idPublicacion).then((response) => {
+      console.log("Respuesta de la petición de Editar:", response.data);
+      if (response.status == 200) {
+        setInitialValues({
+          nombre_desaparecido: response.data.nombredesaparecido,
+          id_tipo_documento: response.data.tipodocumento.id,
+          documento_desaparecido: response.data.numerodocumentodesaparecido,
+          telefono: response.data.telefono,
+          fecha_desaparicion: new Date(response.data.fechadesaparicion).toISOString().split("T")[0],
+          descripcion_desaparecido: response.data.descripcionpersonadesaparecido,
+          relacion_desaparecido: response.data.relacionusuariocondesaparecido,
+          contacto: response.data.informacioncontacto,
+          fecha_nacimiento: new Date(response.data.fechanacimiento).toISOString().split("T")[0],
+          ubicacion_latitud: parseFloat(response.data.ubicacion_desaparicion_latitud).toString(),
+          ubicacion_longitud: parseFloat(response.data.ubicacion_desaparicion_longitud).toString(),
+        });
+
+
+        setMapPosition({lat: parseFloat(response.data.ubicacion_desaparicion_latitud), lng: parseFloat(response.data.ubicacion_desaparicion_longitud)});
+        setSelectedPosition({lat: parseFloat(response.data.ubicacion_desaparicion_latitud), lng: parseFloat(response.data.ubicacion_desaparicion_longitud)});
+        //SETEAR LOS DATOS DE LAS FOTOS Y DOCUMENTOS
+        const fotoDesaparecido = response.data.fotospublicacion.find((foto) => foto.idtipofotopublicacion == 1);
+        console.log("Foto Desaparecido: ", fotoDesaparecido);
+        const documentoPolicia = response.data.fotospublicacion.find((foto) => foto.idtipofotopublicacion == 2);
+
+        setDocumentoPublicacion({fotoDesaparecido: fotoDesaparecido, documentoPolicia: documentoPolicia});
+        setEditandoPublicacion({editando: true, infoPublicacion: idPublicacion});
+        setObteniendoInfoEditar(false);
+        setAbrirPublicacion(true);
+      }
+    });
+  };
+
   const [expandedSection, setExpandedSection] = useState(null);
   const [formFilled, setFormFilled] = useState({
     personalInfo: false,
@@ -98,11 +167,12 @@ export default function Publicaciones() {
 
         // Condicional basado en la sección (por ejemplo, documentUpload)
         if (section === "documentUpload") {
+          console.log("Documento cargado:", fileData);
           setDocumentData(fileData);
           console.log("Documento cargado:", fileData);
         } else if (section === "photoUpload") {
           console.log("Imagen cargada:", fileData);
-          setImageData(fileData);
+          setImageData({...fileData, imagenPreview: fullBase64});
         }
         fileDataArray.push(fileData);
       };
@@ -175,20 +245,8 @@ export default function Publicaciones() {
   });
 
   const formik = useFormik({
-    initialValues: {
-      nombre_desaparecido: "",
-      id_tipo_documento: "",
-      documento_desaparecido: "",
-      telefono: "",
-      fecha_desaparicion: new Date(),
-      descripcion_desaparecido: "",
-      relacion_desaparecido: "",
-      contacto: "",
-      fecha_nacimiento: new Date(),
-      edad: new Date(),
-      ubicacion_latitud: "",
-      ubicacion_longitud: "",
-    },
+    initialValues: initialValues,
+    enableReinitialize: true,
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       setSendingPublicacionData(true);
@@ -206,21 +264,22 @@ export default function Publicaciones() {
 
         console.log("Token: ", obtenerToken());
 
-        const response = await crearPublicacion(values, obtenerToken()); // Espera la respuesta
-        setApiResponse(response); // Guarda la respuesta para manejar el estado
+
+
+        const response = editandoPublicacion.editando ?  
+            await showToast(actualizarPublicacionBO(editandoPublicacion.infoPublicacion, values, obtenerToken()),"Actualizando Publicacion")
+            : 
+            await showToast(crearPublicacion(values, obtenerToken()),"Creando Publicacion"); // Espera la respuesta
+          
         console.log("Respuesta de la petición:", response);
+
+        setApiResponse(response); // Guarda la respuesta para manejar el estado
+
+        console.log("Respuesta de la petición:", response);
+
         if (response.status == 200) {
-          toast.success("Publicación creada correctamente", {
-            position: "top-center",
-            autoClose: 2000,
-            className: "w-auto",
-          });
-          setTimeout(() => {
-            router.push("/");
-          }, 5000);
           console.log("Publicación creada correctamente: ", response.data);
           const idPublicacion = response.data.idpublicacion;
-
           // Subir archivos
           if (imageData) {
             const fecha = new Date();
@@ -250,7 +309,7 @@ export default function Publicaciones() {
             );
 
             // Subir la imagen
-            const uploadResponse = await subirArchivo(uploadData);
+            const uploadResponse = editandoPublicacion.editando ? await actualizarFotoPublicacionBO({...uploadData, id: documentoPublicacion?.fotoDesaparecido?.id}) : await subirArchivo(uploadData);
             if (uploadResponse.status == 200) {
               console.log("Imagen subida correctamente: ", uploadResponse.data);
             } else {
@@ -286,7 +345,7 @@ export default function Publicaciones() {
               uploadData.idpublicacion
             );
             // Subir el documento
-            const uploadResponse = await subirArchivo(uploadData);
+            const uploadResponse = editandoPublicacion?.editando ? await actualizarArchivoPubicacionBO({...uploadData, id: documentoPublicacion?.documentoPolicia?.id}) : await subirArchivo(uploadData);
             if (uploadResponse.status == 200) {
               console.log(
                 "Documento subido correctamente: ",
@@ -296,50 +355,93 @@ export default function Publicaciones() {
               console.log("Error al subir el documento: ", uploadResponse);
             }
           }
+
+          toast.success("Publicación creada correctamente", {
+            position: "top-center",
+            autoClose: 5000,
+            className: "w-auto",
+          });
+          onPopupClose();
+          setNuevaPublicacion(true);
+
         } else {
-            toast.error("Error al crear la publicación", {
-                position: "top-center",
-                autoClose: 5000,
-                className: "w-auto",
-            });
+          toast.error("Error al crear la publicación", {
+            position: "top-center",
+            autoClose: 5000,
+            className: "w-auto",
+          });
+          setSendingPublicacionData(false);
         }
         setSendingPublicacionData(false);
-
       } catch (error) {
         console.log("Error al crear la publicación: ", error);
+        setSendingPublicacionData(false);
         setApiResponse(error);
+        toast.error("Error al crear la publicación", {
+          position: "top-center",
+          autoClose: 5000,
+          className: "w-auto",
+        });
       }
     },
   });
 
-//   useEffect(() => {
-//     console.log("Respuesta de la petición:", apiResponse);
-//     if (apiResponse?.status == 200) {
-//       toast.success("Publicación creada correctamente", {
-//         position: "top-center",
-//         autoClose: 2000,
-//         className: "w-auto",
-//       });
-//       setTimeout(() => {
-//         router.push("/publicaciones");
-//       }, 5000);
-//     } else {
-//       toast.error("Error al crear la publicación", {
-//         position: "top-center",
-//         autoClose: 5000,
-//         className: "w-auto",
-//       });
-//     }
-//     setSendingPublicacionData(false);
-//   }, [apiResponse]);
+  const resetInitialValues = () => {
+    setInitialValues({
+      nombre_desaparecido: "",
+      id_tipo_documento: "",
+      documento_desaparecido: "",
+      telefono: "",
+      fecha_desaparicion: new Date(),
+      descripcion_desaparecido: "",
+      relacion_desaparecido: "",
+      contacto: "",
+      fecha_nacimiento: new Date(),
+      edad: new Date(),
+      ubicacion_latitud: "",
+      ubicacion_longitud: "",
+    });
+  };
 
+  //   useEffect(() => {
+  //     console.log("Respuesta de la petición:", apiResponse);
+  //     if (apiResponse?.status == 200) {
+  //       toast.success("Publicación creada correctamente", {
+  //         position: "top-center",
+  //         autoClose: 2000,
+  //         className: "w-auto",
+  //       });
+  //       setTimeout(() => {
+  //         router.push("/publicaciones");
+  //       }, 5000);
+  //     } else {
+  //       toast.error("Error al crear la publicación", {
+  //         position: "top-center",
+  //         autoClose: 5000,
+  //         className: "w-auto",
+  //       });
+  //     }
+  //     setSendingPublicacionData(false);
+  //   }, [apiResponse]);
+
+  const onPopupClose = () => {
+    setExpandedSection(null)
+    setEditandoPublicacion({editando: false, infoPublicacion: null})
+    setAbrirPublicacion(false)
+    setDocumentoPublicacion({fotoDesaparecido: null, documentoPolicia: null})
+    setDocumentData(null)
+    setImageData(null)  
+    formik.resetForm()
+    resetInitialValues()
+
+  }
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-colorResumen">
-      <div className="h-[45%] bg-greenBackground relative">
-        <h2 className="text-xl text-letterColor font-bold ml-12 mt-8">
-          Publicaciones
-        </h2>
-      </div>
+    <div className="flex flex-col h-screen overflow-hidden bg-50-50-vertical">
+      {/* <div className="h-[45%] bg-greenBackground relative"> */}
+      <h2 className="text-xl text-letterColor font-bold ml-12 mt-8">
+        Publicaciones
+      </h2>
+      {/* </div> */}
 
       <div className="absolute top-8 right-8 flex items-center">
         <button className="text-white p-2 mr-4 flex items-center justify-center h-[40px]">
@@ -358,8 +460,12 @@ export default function Publicaciones() {
           }
           position="right center"
           modal
+          open={editandoPublicacion.editando ? abrirPublicacion : false}
           closeOnDocumentClick
-          onClose={() => setExpandedSection(null)}
+          onClose={() => {
+              onPopupClose(); // Reset the form values
+            }
+          }
           contentStyle={{
             padding: "0px",
             borderRadius: "8px",
@@ -369,7 +475,8 @@ export default function Publicaciones() {
         >
           <div className="p-8 bg-blueBackground rounded-md">
             <h2 className="text-2xl text-customBlue font-bold mb-4">
-              Crear publicación de persona desaparecida
+              {editandoPublicacion.editando ? "Editar publicación" : "Crear publicación"}
+              {/* { "Crear publicación de persona desaparecida"} */}
             </h2>
 
             <form onSubmit={formik.handleSubmit}>
@@ -667,11 +774,25 @@ export default function Publicaciones() {
                         accept="image/*"
                         id="photoUpload"
                         className="w-full px-3 py-2 border border-gray-300 rounded"
-                        multiple
                         onChange={(event) =>
                           handleInputChange("photoUpload", event)
                         }
                       />
+
+                      {(documentoPublicacion.fotoDesaparecido || imageData) && (
+                        <>
+                            <label
+                                className="block text-sm font-medium mt-2"
+                            >
+                                {imageData?.imagenPreview ? "Vista Previa:" : "Foto cargada:"}
+                            </label>
+                          <img
+                            src={imageData?.imagenPreview ? imageData?.imagenPreview : documentoPublicacion.fotoDesaparecido.urlarchivo}
+                            alt="upload"
+                            className="w-36 h-36 mb-2 mt-2"
+                          />
+                      </>
+                      )}
                     </div>
                     <div className="mb-4">
                       <label
@@ -688,6 +809,13 @@ export default function Publicaciones() {
                           handleInputChange("documentUpload", event)
                         }
                       />
+                      {/*Boton de Descargar o Abrir Archivo*/}
+                      {documentoPublicacion.documentoPolicia && ( 
+                        <button className="bg-blueBoton hover:bg-blueOscuro mt-2 text-white font-bold py-2 px-4 rounded">
+                          <a href={documentoPublicacion.documentoPolicia.urlarchivo} target="_blank">Descargar Archivo</a>
+
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
@@ -696,16 +824,16 @@ export default function Publicaciones() {
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  disabled={sendingPublicacionData || !formik.isValid}
+                  disabled={sendingPublicacionData || !formik.isValid || !formik.dirty}
                   style={{
                     backgroundColor:
-                      sendingPublicacionData || !formik.isValid
+                      sendingPublicacionData || !formik.isValid || !formik.dirty
                         ? "#B0B0B0"
                         : "#3E86B9",
                   }}
                   className="bg-blueBoton hover:bg-blueOscuro text-white font-bold py-2 px-4 rounded"
                 >
-                  Enviar
+                  {sendingPublicacionData ? "Enviando..." : {editandoPublicacion} ? "Editar" : "Crear"}
                 </button>
               </div>
             </form>
@@ -713,156 +841,42 @@ export default function Publicaciones() {
         </Popup>
       </div>
 
-      <div className="relative z-10 bg-grayBackground -mt-36 rounded-tl-3xl rounded-tr-3xl p-10 overflow-y-scroll"></div>
+      {/* <div className="relative z-10 bg-grayBackground -mt-36 rounded-tl-3xl rounded-tr-3xl p-10 overflow-y-scroll"></div> */}
 
-       <div className="flex-grow relative">
-                {/* Pass the handleRowClick to MyTable to trigger the popup */}
-                <MyTable onRowClick={handleRowClick} />
-            </div>
+      <div className="relative mt-[10vh]">
+        {/* Pass the handleRowClick to MyTable to trigger the popup */}
+        <TablaPublicaciones
+          headers={[
+            "ID Publicación",
+            "Nombre",
+            "Verificada",
+            "Fecha Desaparición",
+            "Fecha Publicación",
+            "Estatus",
+            "",
+          ]}
+          onRowClick={handleRowClick}
+          className={"flex m-auto top-0 left-0 right-0 max-h-[65vh]"}
+          handleEditandoPublicacion={handleEditantoPublicacion}
+          nuevaPublicacion={nuevaPublicacion}
+          setNuevaPublicacion={setNuevaPublicacion}
+        />
+      </div>
 
-            {/* Popup to show when a row is clicked */}
-            {selectedPerson && (
-                <Popup
-                    open={true}
-                    closeOnDocumentClick
-                    onClose={closePopup}
-                    contentStyle={{
-                        padding: '20px',
-                        borderRadius: '12px',
-                        width: '700px', // Wider for improved UI
-                        maxWidth: '95%',
-                        backgroundColor: '#f9f9f9',
-                        boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)', // Enhanced shadow for depth
-                    }}
+      
+      <ModalAdentroPublicaciones
+        idPublicacion={modalVisible.id}
+        open={modalVisible.mostrar}
+        handleClose={() => setModalVisible({ mostrar: false, id: undefined })}
+      />
+
+              <Modal open={obteniendoInfoEditar} className="content-center">
+                <div
+                    className="flex justify-center items-center self-center mx-auto content-center w-[50vw] bg-white rounded-lg p-4 h-[20vh]"
                 >
-                    <div className="popup-content space-y-6">
-                        <div className="flex justify-between items-center border-b pb-4">
-                            <h2 className="text-2xl font-bold text-gray-800">Información de la persona</h2>
-                            <button onClick={closePopup} className="text-gray-500 hover:text-red-500 transition-colors duration-200">
-                                <FaTimes />
-                            </button>
-                        </div>
-
-                        <img
-                            src={selectedPerson.image || "/assets/persona-desaparecida.jpeg"} // Use the local fallback image
-                            alt="Desaparecido"
-                            className="w-full h-auto mb-4 rounded-lg shadow-sm"
-                        />
-
-                        {/* Editable Fields */}
-                        <div className="space-y-6">
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <strong className="text-gray-700">Nombre completo:</strong> 
-                                    {isEditing.nombre ? (
-                                        <input
-                                            type="text"
-                                            value={selectedPerson.nombre}
-                                            onChange={(e) => handleFieldChange('nombre', e.target.value)}
-                                            className="ml-4 border-b border-gray-400 focus:border-blue-500 transition-all duration-200"
-                                        />
-                                    ) : (
-                                        <span className="ml-4">{selectedPerson.nombre}</span>
-                                    )}
-                                </div>
-                                <FaEdit
-                                    className="text-gray-500 cursor-pointer hover:text-blue-500 transition-colors duration-200"
-                                    onClick={() => handleEditToggle('nombre')}
-                                />
-                            </div>
-
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <strong className="text-gray-700">Fecha de desaparición:</strong> 
-                                    {isEditing.fechaDesaparicion ? (
-                                        <input
-                                            type="text"
-                                            value={selectedPerson.fechaDesaparicion}
-                                            onChange={(e) => handleFieldChange('fechaDesaparicion', e.target.value)}
-                                            className="ml-4 border-b border-gray-400 focus:border-blue-500 transition-all duration-200"
-                                        />
-                                    ) : (
-                                        <span className="ml-4">{selectedPerson.fechaDesaparicion}</span>
-                                    )}
-                                </div>
-                                <FaEdit
-                                    className="text-gray-500 cursor-pointer hover:text-blue-500 transition-colors duration-200"
-                                    onClick={() => handleEditToggle('fechaDesaparicion')}
-                                />
-                            </div>
-
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <strong className="text-gray-700">Último avistamiento:</strong> 
-                                    {isEditing.ultimoAvistamiento ? (
-                                        <input
-                                            type="text"
-                                            value={selectedPerson.ultimoAvistamiento || ''}
-                                            onChange={(e) => handleFieldChange('ultimoAvistamiento', e.target.value)}
-                                            className="ml-4 border-b border-gray-400 focus:border-blue-500 transition-all duration-200"
-                                        />
-                                    ) : (
-                                        <span className="ml-4">{selectedPerson.ultimoAvistamiento || 'N/A'}</span>
-                                    )}
-                                </div>
-                                <FaEdit
-                                    className="text-gray-500 cursor-pointer hover:text-blue-500 transition-colors duration-200"
-                                    onClick={() => handleEditToggle('ultimoAvistamiento')}
-                                />
-                            </div>
-
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <strong className="text-gray-700">Aspeto físico:</strong> 
-                                    {isEditing.aspectoFisico ? (
-                                        <input
-                                            type="text"
-                                            value={selectedPerson.aspectoFisico || ''}
-                                            onChange={(e) => handleFieldChange('aspectoFisico', e.target.value)}
-                                            className="ml-4 border-b border-gray-400 focus:border-blue-500 transition-all duration-200"
-                                        />
-                                    ) : (
-                                        <span className="ml-4">{selectedPerson.aspectoFisico || 'N/A'}</span>
-                                    )}
-                                </div>
-                                <FaEdit
-                                    className="text-gray-500 cursor-pointer hover:text-blue-500 transition-colors duration-200"
-                                    onClick={() => handleEditToggle('aspectoFisico')}
-                                />
-                            </div>
-
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <strong className="text-gray-700">Parentesco:</strong> 
-                                    {isEditing.parentesco ? (
-                                        <input
-                                            type="text"
-                                            value={selectedPerson.parentesco || ''}
-                                            onChange={(e) => handleFieldChange('parentesco', e.target.value)}
-                                            className="ml-4 border-b border-gray-400 focus:border-blue-500 transition-all duration-200"
-                                        />
-                                    ) : (
-                                        <span className="ml-4">{selectedPerson.parentesco || 'N/A'}</span>
-                                    )}
-                                </div>
-                                <FaEdit
-                                    className="text-gray-500 cursor-pointer hover:text-blue-500 transition-colors duration-200"
-                                    onClick={() => handleEditToggle('parentesco')}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="mt-6 flex justify-end">
-                            <button
-                                onClick={closePopup}
-                                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md shadow-sm font-medium transition-colors duration-200"
-                            >
-                                Cerrar
-                            </button>
-                        </div>
-                    </div>
-                </Popup>
-            )}
+                    <CircularProgress/>
+                </div>
+              </Modal>
     </div>
   );
 }

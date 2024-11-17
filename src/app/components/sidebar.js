@@ -4,10 +4,16 @@ import { FaUser, FaMessage } from "react-icons/fa6";
 import { RiBook2Fill } from "react-icons/ri";
 import Avatar from '@mui/material/Avatar';
 import { PiSignOutBold } from "react-icons/pi";
+import { useEffect } from "react";
+import { obtenerInfoBasicaUserBD } from "../../../services/userService";
+import FotoPerfirDefault from "../../../public/assets/profilePicture.svg"
+import { obtenerToken,obtenerFotoPerfil,obtenerNombreUsuario, guardarFotoPerfil,guardarNombreUsuario } from "../../../services/cookiesServices";
 
 export default function SideBar({ setSelectedScreen }) {
     const [selected, setSelected] = useState('home');
     const [isConfigOpen, setIsConfigOpen] = useState(false);
+    const [fotoPerfil, setFotoPerfil] = useState(obtenerFotoPerfil());
+
 
     const handleClick = (item) => {
         setSelected(item);
@@ -20,6 +26,33 @@ export default function SideBar({ setSelectedScreen }) {
 
         setSelectedScreen(item);
     };
+
+
+    const tomarFotoPerfil = async () => {
+        console.log("Obteniendo foto de perfil...");
+        if (fotoPerfil == null) {
+            console.log("Foto de perfil no encontrada");
+            await obtenerInfoBasicaUserBD(obtenerToken()).then((response) => {
+                if (response.status === 200) {
+                    console.log("Foto de perfil encontrada en BD: ", response.data);
+                    guardarFotoPerfil(response.data.urlFotoPerfil);
+                    guardarNombreUsuario(response.data.nombreUsuario);
+                    setFotoPerfil(response.data.urlFotoPerfil);
+                }
+                else {
+                    console.log("Error al obtener foto de perfil: ", response);
+                }
+            });
+        }
+        else {
+            console.log("Foto de perfil encontrada: ", fotoPerfil);
+        }
+    }
+
+    useEffect(() => {
+        tomarFotoPerfil();
+    }
+    , [fotoPerfil]);
 
     return (
         <div className="md:w-1/5 bg-blueSidebar min-h-screen flex flex-col">
@@ -77,12 +110,12 @@ export default function SideBar({ setSelectedScreen }) {
             {/* Configuración y perfil */}
             <div className="flex flex-col items-start py-6">
                 <div className="w-full text-customBlue flex items-center pt-6">
-                    <Avatar alt="Rosanna Bautista" src="/assets/profilePicture.png" className="ml-10" />
-                    <div className="ml-3 items-start">
-                        <h4 className="font-bold text-sm">Rosanna Bautista</h4>
+                    <Avatar alt="Rosanna Bautista" src={fotoPerfil || FotoPerfirDefault} className="ml-10" />
+                    <div className="ml-3 items-start max-w-[50%]">
+                        <h4 className="font-bold text-sm">{obtenerNombreUsuario()||"Rosanna Bautista"}</h4>
                         <h5 className="text-xs">Administrador</h5>
                     </div>
-                    <PiSignOutBold className={`w-6 h-6 ml-8 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110`} />
+                    <PiSignOutBold className={`w-6 h-6 ml-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110`} />
                 </div>
             </div>
         </div>
