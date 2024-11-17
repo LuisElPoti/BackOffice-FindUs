@@ -1,10 +1,8 @@
-import { Modal } from "@mui/material";
-import Mapa from "./map";
-import { useState, useEffect, use } from "react";
+import { Modal,CircularProgress } from "@mui/material";
+import { useState, useEffect } from "react";
 import { IoMdClose } from "react-icons/io";
-import { useFormik } from "formik";
-import * as Yup from "yup";
-import {CircularProgress } from '@mui/material';
+// import { useFormik } from "formik";
+// import * as Yup from "yup";
 import { obtenerMaterialEducativoByID } from "../../../services/materialEducativoServices";
 import { formatearFecha } from "../../../services/publicacionServices";
 import { toast,ToastContainer } from "react-toastify";
@@ -44,73 +42,6 @@ export default function ModalAdentroMaterialEducativo({ open, handleClose, idMat
           });
         }
     }, [idMaterialEducativo]);
-
-
-    //   const validationSchema = Yup.object({
-    //     fecha_avistamiento: Yup.date().required("Este campo es obligatorio"),
-    //     detalles: Yup.string().required("Este campo es obligatorio"),
-    //     ubicacion_latitud: Yup.string().required("Este campo es obligatorio"),
-    //     ubicacion_longitud: Yup.string().required("Este campo es obligatorio"),
-    //     imageData: Yup.object().required(),
-    //   });
-    
-
-    //   const formik = useFormik({
-    //     initialValues: {
-    //       fecha_avistamiento: new Date(),
-    //       detalles: "",
-    //       ubicacion_latitud: undefined,
-    //       ubicacion_longitud: undefined,
-    //       imageData: null,
-    //       idPublicacion: idPublicacion,
-    //     },
-    //     validationSchema: validationSchema,
-    //     onSubmit: async (values) => {
-        
-    //       console.log(values)
-    //       setSendingData(true);
-    //       values.ubicacion_latitud = values.ubicacion_latitud.toString();
-    //       values.ubicacion_longitud = values.ubicacion_longitud.toString();
-    //       values.idPublicacion = publicacion?.id;
-    //       try{
-    //         const { imageData, ...datosAvistamiento } = values;
-
-    //         const dataFoto = {
-    //             // idavistamiento: response.data.idAvistamiento,
-    //             base64File: values?.imageData?.base64,
-    //             fileName: values?.imageData?.fileName,
-    //             mimeType: values?.imageData?.mimeType
-    //           }
-    //         showToast(crearAvistamiento({dataAvistamiento: datosAvistamiento, dataFoto: dataFoto}),"Creando avistamiento...").then((response) => {
-    //             if(response.status === 200){
-    //                 // console.log("Avistamiento creado correctamente: ", response.data);
-    //                 // console.log("ID DEL AVISTAMIENTO: ", response.data.idAvistamiento);
-
-    //                 obtenerAvistamientoPublicacion(values.idPublicacion).then((response) => {
-    //                     setPublicacion({...publicacion, avistamiento: response.data});
-    //                     // console.log("AVISTAMIENTOS DE LA PUBLICACION",response);
-    //                 });
-    //                 formik.resetForm();
-    //                 toast.success("Avistamiento creado correctamente",{position: "top-center",className: "w-auto",autoClose: 3000});
-    //             }else{
-    //                 console.log("Error al crear la publicación: ", response.data.message);
-    //                 toast.error("Error al crear el avistamiento",{position: "top-center",className: "w-auto",autoClose: 3000});
-    //             }
-    //             setSendingData(false);
-    //         }).catch((error) => {
-    //             console.log("ERROR EN EL SUBMIT",error);
-    //             setSendingData(false);
-    //         });
-    //       }catch(error){
-    //         console.log("ERROR EN EL SUBMIT",error);
-    //     }
-    //   }
-    //   });
-    
-    //   useEffect(() => {
-    //     console.log("FORMIK VALES",formik.values);
-    // }, [formik?.values]);
-
 
     if(loadingData){
         console.log("CARGANDO DATOS");

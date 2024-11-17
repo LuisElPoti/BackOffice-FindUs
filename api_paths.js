@@ -1,6 +1,7 @@
 //Agregar las rutas de conexión al backend Aquí
 
-import { obtenerUsuariosTabla } from "./services/userService";
+// import { actualizarPublicacion } from "./services/publicacionServices";
+// import { obtenerUsuariosTabla } from "./services/userService";
 
 // API Link de prueba en Emulador de Android: en PC
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -17,6 +18,9 @@ const apiRoutes = {
     obtenerUsuariosTabla: (page, limit) => `${API_BASE_URL}/user/obtenerUsuariosTabla/${page}/${limit}`,
     obtenerUsuarioByID: (id) => `${API_BASE_URL}/user/${id}`,
     actualizarAdminAUsuario: (id) => `${API_BASE_URL}/user/admin_update_user/${id}`,
+    obtenerInformacionesHome: () =>  `${API_BASE_URL}/user/obtener_informaciones_home_bo/`,
+
+
     //Rutas Rol
     obtenerRol: () => `${API_BASE_URL}/roles/obtenerRoles`,
     obtenerInfoBasicaUser : () => `${API_BASE_URL}/user/obtener_info_basica_user`,
@@ -32,6 +36,9 @@ const apiRoutes = {
     obtenerTipoMaterialEducativo: () => `${API_BASE_URL}/tipo_material_educativo/obtenerTipoMaterialEducativo`,
     obtenerMaterialEducativoTabla: (page,limit) => `${API_BASE_URL}/recursos_educativos/obtenerMaterialEducativoTabla/${page}/${limit}`,
     obtenerMaterialEducativoByID: (id) => `${API_BASE_URL}/recursos_educativos/obtenerMaterialEducativoByID/${id}`,
+    desactivarRecursoEducativo: (id) => `${API_BASE_URL}/recursos_educativos/desactivarRecursoEducativo/${id}`,
+    activarRecursoEducativo: (id) => `${API_BASE_URL}/recursos_educativos/activarRecursoEducativo/${id}`,
+    editarRecursoEducativo: (id) => `${API_BASE_URL}/recursos_educativos/editarRecursoEducativo/${id}`,
 
     //Rutas de Publicacion
     obtenerPublicaciones: () => `${API_BASE_URL}/desaparecido/obtenerDesaparecidos`,
@@ -42,14 +49,25 @@ const apiRoutes = {
     obtenerDesaparecidosTabla: (page,limit) => `${API_BASE_URL}/desaparecido/obtenerDesaparecidoTabla/${page}/${limit}`,
     obtenerInfoDesaparecidoByID: (id) => `${API_BASE_URL}/desaparecido/obtenerInfoDesaparecidoByID/${id}`,
     crearComentarioPublicaciones: () => `${API_BASE_URL}/desaparecido/crearComentarioPublicaciones`,
+    obtenerInformacionEditarPublicacionBO: (id) => `${API_BASE_URL}/desaparecido/obtenerInformacionEditarPublicacionBO/${id}`,
+    actualizarPublicacionBO: (id) => `${API_BASE_URL}/desaparecido/actualizarDesaparecidoBO/${id}`,
+    activarPublicacion: (id) => `${API_BASE_URL}/desaparecido/activarPublicacion/${id}`,
+    desactivarPublicacion: (id) => `${API_BASE_URL}/desaparecido/desactivarPublicacion/${id}`,
+    verificarPublicacion: (id) => `${API_BASE_URL}/desaparecido/verificarPublicacion/${id}`,
 
     //Rutas de Avistamientos
     crearAvistamiento: () => `${API_BASE_URL}/avistamiento/crearAvistamiento`,
     subirFotoAvistamiento: () => `${API_BASE_URL}/avistamiento/subirFotoAvistamiento`,
     obtenerAvistamientoPublicacion: (idPublicacion) => `${API_BASE_URL}/avistamiento/obtenerAvistamientoPublicacion/${idPublicacion}`,
+    activarAvistamiento: (id) => `${API_BASE_URL}/avistamiento/activarAvistamiento/${id}`,
+    desactivarAvistamiento: (id) => `${API_BASE_URL}/avistamiento/desactivarAvistamiento/${id}`,
+    verificarAvistamiento: (id) => `${API_BASE_URL}/avistamiento/verificarAvistamiento/${id}`,
+    editarAvistamiento: (id) => `${API_BASE_URL}/avistamiento/editarAvistamiento/${id}`,
 
     // Fotos publicacion
     subirArchivo: () => `${API_BASE_URL}/fotospublicacion/crearFotoPublicacion`,
+    actualizarFotoPublicacionBO: () => `${API_BASE_URL}/fotospublicacion/updateFotoPublicacionBO`,
+    actualizarArchivoPubicacionBO: () => `${API_BASE_URL}/fotospublicacion/updateArchivoPoliciaPublicacionBO`,
 
     //Estados
     obtenerEstadosPublicaciones: () => `${API_BASE_URL}/estado/obtenerEstadosPublicaciones`,

@@ -35,6 +35,7 @@ export default function Users() {
               "ID",
               "Nombre",
               "Apellido",
+              "Verificado",
               "Correo",
               "Rol",
               "Estatus",

@@ -1,4 +1,4 @@
-import React, { use, useEffect,useCallback } from 'react';
+import React, { use, useEffect,useCallback, useState } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -7,11 +7,15 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { IoMdMore } from "react-icons/io";
-import { useState } from 'react';
-import { obtenerDesaparecidosTabla } from '../../../services/publicacionServices';
+import { obtenerDesaparecidosTabla, activarPublicacion, desactivarPublicacion, verificarPublicacion } from '../../../services/publicacionServices';
 import { obtenerEstadosPublicaciones } from '../../../services/categoriasServices';
-import { TableFooter, TablePagination, CircularProgress, Menu, MenuItem } from '@mui/material';
+import { TableFooter, TablePagination, CircularProgress, Menu, MenuItem, Modal } from '@mui/material';
 import TablePaginationActions from './tableActionsComponent'; 
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { GiCancel } from "react-icons/gi";
+import { MdOutlineVerified } from "react-icons/md";
+
 
 function createData(ID, nombre, fechaDesaparicion,fechaPublicacion, estatus) {
     return { ID, nombre, fechaDesaparicion, fechaPublicacion,estatus };
@@ -27,7 +31,7 @@ const rows = [
     // Add more rows if needed
 ];
 
-export default function TablaPublicaciones({ headers, onRowClick,className }) {
+export default function TablaPublicaciones({ headers, onRowClick,className, handleEditandoPublicacion,nuevaPublicacion, setNuevaPublicacion }) {
     const [anchorEl, setAnchorEl] = useState(null);
     const [search, setSearch] = useState('');
     const [fechaDesde, setFechaDesde] = useState(null);
@@ -39,6 +43,9 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
     const [estados, setEstados] = useState([]);
     const [loading, setLoading] = useState(false);
     const [filtersCleaned, setFiltersCleaned] = useState(false);
+    const [selectedPublicacion, setSelectedPublicacion] = useState({idPublicacion: null, idEstado: null, nombre: null,verificado: null});
+    const [openModalDesAct, setOpenModalDesAct] = useState({abrir: false, idPublicacion: null, activado: true, nombrePublicacion: null});
+    const [openModalVerificar, setOpenModalVerificar] = useState({abrir: false, idPublicacion: null, activado: null, verificado: null, nombrePublicacion: null});
 
 
     const formatearFecha = (fecha) => {
@@ -92,11 +99,20 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
 
     useEffect(() => {
         obtenerData();
-    }, [page, limit]);
+    }, [page, limit, search, fechaDesde, fechaHasta, estatus]);
 
     useEffect(() => {
         obtenerEstados();
     }, []);
+
+    useEffect(() => {
+        if(nuevaPublicacion){
+            obtenerData();
+            setNuevaPublicacion(false);
+        }
+    }
+    , [nuevaPublicacion]);
+
 
     useEffect(() => {
         console.log("Data", data);
@@ -109,31 +125,56 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
     }
     , [limit]);
 
-    const handleClick = (event, idPublicacion) => {
+    const handleClick = (event, idPublicacion, idEstado, nombrePublicacion, verificado) => {
         setAnchorEl(event.currentTarget);
         console.log("ID DE LA PUBLICACION",idPublicacion)
-        // setSelectedPublicacion(publicacion);
+        setSelectedPublicacion({
+            idPublicacion: idPublicacion, 
+            idEstado: idEstado, 
+            nombre: nombrePublicacion,
+            verificado: verificado
+        });
     };
 
     const handleClose = () => {
         setAnchorEl(null);
-        setSelectedPublicacion(null);
+        setSelectedPublicacion({idPublicacion: null, idEstado: null, nombre: null,verificado: null});
     };
 
     const handleEdit = () => {
         console.log('Editando publicación:', selectedPublicacion);
+        handleEditandoPublicacion(selectedPublicacion?.idPublicacion);
         handleClose();
     };
 
     const handleView = () => {
         console.log('Viendo publicación:', selectedPublicacion);
+        onRowClick(selectedPublicacion?.idPublicacion);
         handleClose();
     };
 
     const handleDeactivate = () => {
         console.log('Desactivando publicación:', selectedPublicacion);
+        setOpenModalDesAct({
+            abrir: true, 
+            idPublicacion: selectedPublicacion?.idPublicacion, 
+            activado: selectedPublicacion?.idEstado == 1,
+            nombrePublicacion: selectedPublicacion?.nombre
+        });
         handleClose();
     };
+
+    const handleVerify = () => {
+        console.log('Verificando publicación:', selectedPublicacion);
+        setOpenModalVerificar({
+            abrir: true, 
+            idPublicacion: selectedPublicacion?.idPublicacion, 
+            activado: selectedPublicacion?.idEstado == 1,
+            verificado: selectedPublicacion?.verificado,
+            nombrePublicacion: selectedPublicacion?.nombre
+        });
+        handleClose();
+    }
 
 
     return (
@@ -277,16 +318,37 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
                                         >
                                             <TableCell align="left" className='text-center'>{publicacion?.id}</TableCell>
                                             <TableCell align="left" className='text-center'>{publicacion?.nombredesaparecido}</TableCell>
+                                            <TableCell align="left" className='text-center'>{publicacion?.verificado ? 
+                                                <MdOutlineVerified
+                                                    style={{ color: '#10B981' }}
+                                                    size={25}
+                                                    className='mx-auto'
+                                                /> 
+                                                : 
+                                                <GiCancel
+                                                    style={{ color: '#EF4444' }}
+                                                    size={20}
+                                                    className='mx-auto'
+                                                />
+                                                }
+                                            </TableCell>
                                             <TableCell align="left" className='text-center'>{formatearFecha(publicacion?.fechadesaparicion)}</TableCell>
                                             <TableCell align="left" className='text-center'>{formatearFecha(publicacion?.fechacreacion)}</TableCell>
                                             <TableCell align="center" className='text-center'>
-                                                <div className='text-xs text-blueBorder border border-blueBorder px-0.5 py-1 bg-blueInside rounded-sm'>
+                                                <div 
+                                                    className='text-xs border px-0.5 py-1 rounded-sm'
+                                                    style={{ 
+                                                        backgroundColor: publicacion?.estado?.id == 1 ? '#F3F7FD' : '#ffe2e2' ,
+                                                        color: publicacion?.estado?.id == 1 ? '#2E5AAC' : '#EF4444',
+                                                        borderColor: publicacion?.estado?.id == 1 ? '#2E5AAC' : '#EF4444',
+                                                    }}
+                                                >
                                                     {publicacion?.estado?.nombreestado}
                                                 </div>
                                             </TableCell>
                                             <TableCell align="left">
                                                 <button
-                                                    onClick={(event) => handleClick(event, publicacion?.id)}
+                                                    onClick={(event) => handleClick(event, publicacion?.id, publicacion?.estado?.id, publicacion?.nombredesaparecido, publicacion?.verificado)}
                                                 >
                                                     <IoMdMore size={20} />
                                                 </button>
@@ -300,9 +362,14 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
                                                         }
                                                     }}
                                                 >
-                                                    <MenuItem onClick={handleEdit}>Editar Publicación</MenuItem>
                                                     <MenuItem onClick={handleView}>Ver Publicación</MenuItem>
-                                                    <MenuItem onClick={handleDeactivate}>Desactivar Publicación</MenuItem>
+                                                    {selectedPublicacion?.idEstado == 1 &&(
+                                                        <MenuItem onClick={handleEdit}>Editar Publicación</MenuItem>
+                                                    )}
+                                                    <MenuItem onClick={handleDeactivate}>{(selectedPublicacion?.idEstado == 1 ) ? "Desactivar Publicación" : "Activar Publicación"}</MenuItem>
+                                                    {(!selectedPublicacion?.verificado && selectedPublicacion?.verificado !== null && selectedPublicacion?.idEstado === 1) && (
+                                                        <MenuItem onClick={handleVerify}>Verificar Publicacion</MenuItem>
+                                                    )}
                                                 </Menu>
                                             </TableCell>
                                         </TableRow>
@@ -340,7 +407,176 @@ export default function TablaPublicaciones({ headers, onRowClick,className }) {
                         </TableFooter>
                     </Table>
                 </TableContainer>
+
+                <ModalCambiarEstadoPublicacion 
+                    open={openModalDesAct?.abrir} 
+                    handleClose={() => {
+                        // if(actualizar){
+                        //     setNuevaPublicacion(true);
+                        // }
+                        setOpenModalDesAct({abrir: false, idPublicacion: null, activado: true});
+                     }} 
+                    activado={openModalDesAct?.activado}
+                    idPublicacion={openModalDesAct?.idPublicacion}
+                    nombrePublicacion={openModalDesAct?.nombrePublicacion}
+                    setActualizar={setNuevaPublicacion}
+                />
+
+                <ModalVerificarPublicacion
+                    open={openModalVerificar?.abrir} 
+                    handleClose={() => setOpenModalVerificar({abrir: false, idPublicacion: null, activado: null, verificado: null, nombrePublicacion: null})} 
+                    activado={openModalVerificar?.activado}
+                    idPublicacion={openModalVerificar?.idPublicacion}
+                    nombrePublicacion={openModalVerificar?.nombrePublicacion}
+                    setActualizar={setNuevaPublicacion}
+                />
+                
             </div>
         </>
     );
+}
+
+
+
+function ModalCambiarEstadoPublicacion({open, handleClose, activado, nombrePublicacion, idPublicacion, setActualizar}) {
+
+    const showToast = async (promise, mensaje) => {
+        return toast.promise(
+          promise,
+          {
+            pending: mensaje,
+          },
+          { position: "top-center", autoClose: 2000, className: "w-auto" }
+        );
+      };
+
+      
+    const handleConfirm = () => {
+        
+        if(activado){
+            showToast(desactivarPublicacion(idPublicacion), "Desactivando publicación...").then((response) => {
+                handleClose();
+                if (response.status === 200) {
+                    toast.success("Publicación Desactivada", { position: "top-center", autoClose: 2000, className: "w-auto" });
+                    setActualizar(true);
+                    console.log("Publicación Desactivada",response);
+                }
+                else{
+                    toast.error("Error al desactivar la publicación", { position: "top-center", autoClose: 2000, className: "w-auto" });
+                }
+            }).catch((error) => {
+                toast.error("Error al desactivar la publicación", { position: "top-center", autoClose: 2000, className: "w-auto" });
+                console.log(error);
+            });
+        }else{
+            showToast(activarPublicacion(idPublicacion),"Activando Publicacion...").then((response) => {
+                handleClose();
+                if (response.status === 200) {
+                    toast.success("Publicación Activada", { position: "top-center", autoClose: 2000, className: "w-auto" });
+                    setActualizar(true);
+                    console.log("Publicación Activada",response);
+                }else{
+                    toast.error("Error al activar la publicación", { position: "top-center", autoClose: 2000, className: "w-auto" });
+                }
+            }).catch((error) => {
+                toast.error("Error al activar la publicación", { position: "top-center", autoClose: 2000, className: "w-auto" });
+                console.log(error);
+            });
+        }
+    }
+
+
+    return (
+        <Modal open={open} onClose={handleClose} className='content-center'>
+            <div
+                className='flex flex-col justify-center items-center self-center mx-auto content-center w-[35vw] bg-white rounded-lg p-4'
+            >
+                <h1 className='w-full text-center text-3xl font-extrabold text-[#233E58] mt-4 pl-3'>Cambiar Estado de Publicación</h1>
+                {activado  ? (
+                    <p className='text-[#233E58] mt-8 px-6 text-xl'>¿Está seguro que desea cambiar el estado de la publicación de <strong>{nombrePublicacion} - ID: {idPublicacion}</strong> de <strong>Activada</strong> a <strong>Desactivada</strong>?</p>
+                ) : (
+                    <p className='text-[#233E58] mt-8 px-6 text-xl'>¿Está seguro que desea cambiar el estado de la publicación de <strong>{nombrePublicacion} - ID: {idPublicacion}</strong> de <strong>Desactivada</strong> a <strong>Activada</strong>?</p>
+                )}
+
+                <div className='flex flex-row justify-center items-center mt-8'>
+                    <button
+                        className='bg-[#233E58] text-white font-bold py-2 px-4 rounded-md mx-2'
+                        onClick={handleConfirm}
+                    >
+                        Confirmar
+                    </button>
+                    <button
+                        className='bg-[#E53E3E] text-white font-bold py-2 px-4 rounded-md mx-2'
+                        onClick={handleClose}
+                    >
+                        Cancelar
+                    </button>
+                </div>
+            </div>   
+        </Modal>
+    )
+}
+
+function ModalVerificarPublicacion({open, handleClose, activado, nombrePublicacion, idPublicacion, setActualizar}) {
+
+    const showToast = async (promise, mensaje) => {
+        return toast.promise(
+          promise,
+          {
+            pending: mensaje,
+          },
+          { position: "top-center", autoClose: 2000, className: "w-auto" }
+        );
+      };
+
+      const handleConfirm = () => {
+        showToast(verificarPublicacion(idPublicacion), "Verificando publicación...").then((response) => {
+            handleClose();
+            if (response.status === 200) {
+                toast.success("Publicación Verificada", { position: "top-center", autoClose: 2000, className: "w-auto" });
+                setActualizar(true);
+                console.log("Publicación Verificada",response);
+            }
+            else{
+                toast.error("Error al verificar la publicación", { position: "top-center", autoClose: 2000, className: "w-auto" });
+            }
+        }).catch((error) => {
+            toast.error("Error al verificar la publicación", { position: "top-center", autoClose: 2000, className: "w-auto" });
+            console.log(error);
+        });
+    }
+
+              
+    return (
+        <Modal open={open} onClose={handleClose} className='content-center'>
+            <div
+                className='flex flex-col justify-center items-center self-center mx-auto content-center w-[35vw] bg-white rounded-lg p-4'
+            >
+                <h1 className='w-full text-center text-3xl font-extrabold text-[#233E58] mt-4 pl-3'>Verificar Vericidad de Publicación</h1>
+                {/* {activado  ? ( */}
+                    {/* <> */}
+                        <p className='text-[#233E58] mt-8 px-6 text-xl'>¿Está seguro que desea verificar la vericidad de la publicación de <strong>{nombrePublicacion} - ID: {idPublicacion}</strong>?</p>
+                        <p className='text-[#233E58] mt-8 px-6 text-xl'>Le sugerimos que antes de verificarla, verifique las informaciones de la misma y la prueba de la denuncia a a policia. Esta acción le daría mayor credibilidad a la publicación, así que verificar correctamente las informaciones.</p>
+                    {/* </> */}
+                {/* ) : (
+                    <p className='text-[#233E58] mt-8 px-6 text-xl'>¿Está seguro que desea cambiar el estado de la publicación de <strong>{nombrePublicacion} - ID: {idPublicacion}</strong> de <strong>Desactivada</strong> a <strong>Activada</strong>?</p>
+                )} */}
+
+                <div className='flex flex-row justify-center items-center mt-8'>
+                    <button
+                        className='bg-[#233E58] text-white font-bold py-2 px-4 rounded-md mx-2'
+                        onClick={handleConfirm}
+                    >
+                        Confirmar
+                    </button>
+                    <button
+                        className='bg-[#E53E3E] text-white font-bold py-2 px-4 rounded-md mx-2'
+                        onClick={handleClose}
+                    >
+                        Cancelar
+                    </button>
+                </div>
+            </div>   
+        </Modal>
+    )
 }
