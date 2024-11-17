@@ -10,6 +10,14 @@ const formato_nombres = (nombres) => {
                   .join(' '); // Volver a unir las palabras con un espacio en blanco
 }
 
+const calcular_porcentaje_diferencia_entre_semana = (semana_actual, semana_pasada) => {
+    if (semana_pasada === 0) {
+        return 100;
+    }
+    return ((semana_actual - semana_pasada) / semana_pasada) * 100;
+}
+
+
 
 //Funciones de comunicacion con el servidor
 const registrarUsuario = async (usuario) => {
@@ -127,6 +135,20 @@ const actualizarAdminAUsuario = async (id, data) => {
     }
 }
 
+
+const obtenerInformacionesHome = async (token) => {
+    try {
+        const response = await axios.get(apiRoutes.obtenerInformacionesHome(), {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
 //Exportar funciones
 export {
     registrarUsuario,
@@ -139,5 +161,7 @@ export {
     verificarToken,
     obtenerUsuariosTabla,
     obtenerUsuarioByID,
-    actualizarAdminAUsuario
+    actualizarAdminAUsuario,
+    obtenerInformacionesHome,
+    calcular_porcentaje_diferencia_entre_semana
 };
