@@ -5,7 +5,7 @@ import { IoShieldCheckmark } from "react-icons/io5";
 import { obtenerInformacionesHome, calcular_porcentaje_diferencia_entre_semana } from "../../../services/userService";
 import { obtenerToken } from "../../../services/cookiesServices";
 import { useEffect, useState } from "react";
-import { BsBinoculars } from "react-icons/bs";
+const Binocular1 = "/assets/binoculars.svg";
 import PieChartWithTotal from "../components/graficoDonaUsuario";
 
 
@@ -96,8 +96,8 @@ export default function Home() {
                 <h3 className="text-xs font-bold text-customBlue">AVISTAMIENTOS NUEVOS</h3>
                 <p className="text-xl font-bold text-blueInactive mt-1">{informacionesSemanaActual?.avistamientos_semana}</p>
               </div>
-              <div className="rounded-full w-11 h-11 bg-blueReport flex items-center justify-center mt-[-8px] ml-[10px]">
-                <BsBinoculars className="text-white w-[55%] h-[55%]"></BsBinoculars>
+              <div className="rounded-full w-11 h-11 bg-blueReport flex items-center justify-center mt-[-8px] ml-[10px] overflow-hidden">
+              <img src={Binocular1} alt="Binoculars" className="w-[60%] h-[60%]" />
               </div>
             </div>
             <div className="flex items-center text-xs ml-6 mt-1">
