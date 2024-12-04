@@ -19,6 +19,7 @@ const apiRoutes = {
     obtenerUsuarioByID: (id) => `${API_BASE_URL}/user/${id}`,
     actualizarAdminAUsuario: (id) => `${API_BASE_URL}/user/admin_update_user/${id}`,
     obtenerInformacionesHome: () =>  `${API_BASE_URL}/user/obtener_informaciones_home_bo/`,
+    obtenerInfoUserPerfil: () => `${API_BASE_URL}/user/obtener_info_user_perfil/`,
 
 
     //Rutas Rol

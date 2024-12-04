@@ -2,6 +2,26 @@ import apiRoutes from "../api_paths";
 import axios from "axios";
 
 
+const extraerEdad = (fecha) => {
+    const fechaNacimiento = new Date(fecha);
+    const fechaActual = new Date();
+  
+    let edad = fechaActual.getFullYear() - fechaNacimiento.getFullYear();
+  
+    // Verifica si el cumpleaños ya ocurrió este año
+    const mesNacimiento = fechaNacimiento.getMonth();
+    const diaNacimiento = fechaNacimiento.getDate();
+    const mesActual = fechaActual.getMonth();
+    const diaActual = fechaActual.getDate();
+  
+    // Resta un año si el cumpleaños no ha ocurrido aún en el año actual
+    if (mesActual < mesNacimiento || (mesActual === mesNacimiento && diaActual < diaNacimiento)) {
+      edad--;
+    }
+  
+    return edad;
+  };
+
 const formato_nombres = (nombres) => {
     return nombres.trim() // Eliminar espacios al principio y al final
                   .toLowerCase() // Convertir toda la cadena a minúsculas
@@ -149,8 +169,23 @@ const obtenerInformacionesHome = async (token) => {
     }
 }
 
+
+const obtenerInfoUserPerfilBD = async (token) => {
+    try {
+        const response = await axios.get(apiRoutes.obtenerInfoUserPerfil(),{
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
 //Exportar funciones
 export {
+    extraerEdad,
     registrarUsuario,
     formato_nombres,
     confirmarCorreo,
@@ -163,5 +198,6 @@ export {
     obtenerUsuarioByID,
     actualizarAdminAUsuario,
     obtenerInformacionesHome,
-    calcular_porcentaje_diferencia_entre_semana
+    calcular_porcentaje_diferencia_entre_semana,
+    obtenerInfoUserPerfilBD,
 };
