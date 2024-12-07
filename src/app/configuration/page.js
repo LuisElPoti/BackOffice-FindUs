@@ -1,6 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AiOutlineSetting } from 'react-icons/ai';
 import { FaLanguage, FaUser, FaLock } from 'react-icons/fa';
+import Avatar from '@mui/material/Avatar';
+import { obtenerInfoUserPerfilBD, extraerEdad } from "../../../services/userService.js";
+import {obtenerToken} from "../../../services/cookiesServices.js";
+import FotoPerfirDefault from "../../../public/assets/profilePicture.svg";
+import { formatearFecha } from "../../../services/publicacionServices.js";
 
 export default function Configuracion() {
     // Estado para rastrear la sección seleccionada
@@ -12,6 +17,30 @@ export default function Configuracion() {
         hasNumber: false,
         hasValidSymbols: false,
     });
+    const [userData, setUserData] = useState({});
+    const [userStatistics, setUserStatistics] = useState({});
+    const [loading, setLoading] = useState(true);
+
+
+    useEffect(() => {
+        setLoading(true);
+        obtenerInfoUserPerfilBD(obtenerToken()).then((response) => {
+            if(response.status === 200){
+                 console.log("Información del perfil: ",response.data);
+                setUserData(response.data.informacionesPerfil);
+                setUserStatistics(response.data.estadisticasPublicaciones);
+            }else{
+                console.log("Error al obtener la información del perfil: ",response.data);
+            }
+        }).catch((error) => {
+            console.log("Error al obtener la información del perfil: ",error);
+        }).finally(() => {
+            setLoading(false);
+        });
+    }, []);
+    
+    
+    
 
     const handlePasswordChange = (e) => {
         const value = e.target.value;
@@ -84,19 +113,49 @@ export default function Configuracion() {
 
                     {selectedSection === "perfil" && (
                         <div className="bg-colorResumen shadow-md rounded-md p-4 mb-4 w-3/4">
-                            <h2 className="text-xl font-semibold text-customBlue mb-2">Perfil</h2>
-                            <p className="text-gray-700">Gestiona tu información personal.</p>
-                            <form>
-                                <div className="mb-3">
-                                    <label className="block text-gray-700">Nombre</label>
-                                    <input type="text" className="border rounded-md p-2 w-full" />
+                            <div className="flex flex-col items-start mb-2">
+                            <Avatar src={userData?.urlfotoperfil} sx={{ width: 70, height: 70 }}/>
+                            </div>
+                            <h2 className="text-xl font-semibold text-customBlue mb-2">Datos del Perfil</h2>
+                            {/* Información del perfil */}
+                            <div className="text-gray-700 text-left mb-4 mt-4">
+                                <p><strong>Nombre:</strong> {userData?.nombre} {userData?.apellido}</p>
+                                <p><strong>Correo:</strong> {userData?.email}</p>
+                                <p><strong>Tipo de Documento:</strong> {userData?.tipodocumento?.nombretipodocumento}</p>
+                                <p><strong>Número del Documento:</strong> {userData?.numerodocumento}</p>
+                                <p><strong>Número de Teléfono:</strong> {userData?.numerotelefono}</p>
+                                <p><strong>Rol:</strong> {userData?.rol?.nombrerol}</p>
+                                <p><strong>Fecha de Nacimiento:</strong> {formatearFecha(userData?.fechanacimiento)} ({extraerEdad(userData?.fechanacimiento)} años)</p>
+                            </div>
+
+                            {/* Estadísticas del perfil */}
+                            <h2 className="text-xl font-semibold text-customBlue mb-4">Estadísticas del Perfil</h2>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                <div className="bg-white shadow-lg rounded-md p-4 text-center">
+                                    <h3 className="text-lg font-semibold text-gray-700">Publicaciones Hechas</h3>
+                                    <p className="text-xl font-bold text-blueOscuro">{userStatistics?.totalPublicacionesHechas}</p>
                                 </div>
-                                <div className="mb-3">
-                                    <label className="block text-gray-700">Correo Electrónico</label>
-                                    <input type="email" className="border rounded-md p-2 w-full" />
+                                <div className="bg-white shadow-lg rounded-md p-4 text-center">
+                                    <h3 className="text-lg font-semibold text-gray-700">Publicaciones Activas</h3>
+                                    <p className="text-xl font-bold text-blueOscuro">{userStatistics?.totalPublicacionesActivas}</p>
                                 </div>
-                                <button className="bg-customBlue text-white py-2 px-4 rounded-md">Guardar Cambios</button>
-                            </form>
+                                <div className="bg-white shadow-lg rounded-md p-4 text-center">
+                                    <h3 className="text-lg font-semibold text-gray-700">Publicaciones Cerradas</h3>
+                                    <p className="text-xl font-bold text-blueOscuro">0</p>
+                                </div>
+                                <div className="bg-white shadow-lg rounded-md p-4 text-center">
+                                    <h3 className="text-lg font-semibold text-gray-700">Publicaciones Desactivadas</h3>
+                                    <p className="text-xl font-bold text-blueOscuro">{userStatistics?.totalPublicacionesInactivas}</p>
+                                </div>
+                                <div className="bg-white shadow-lg rounded-md p-4 text-center">
+                                    <h3 className="text-lg font-semibold text-gray-700">Avistamientos Publicados</h3>
+                                    <p className="text-xl font-bold text-blueOscuro">{userStatistics?.totalAvistamientosPublicados}</p>
+                                </div>
+                                <div className="bg-white shadow-lg rounded-md p-4 text-center">
+                                    <h3 className="text-lg font-semibold text-gray-700">Comentarios Realizados</h3>
+                                    <p className="text-xl font-bold text-blueOscuro">{userStatistics?.totalComentariosHechos}</p>
+                                </div>
+                            </div>
                         </div>
                     )}
 
