@@ -1,12 +1,17 @@
+"use client";
 import { FaArrowUp, FaArrowDown } from "react-icons/fa6";
 import { AiFillEye } from "react-icons/ai";
 import { MdAddBox } from "react-icons/md";
 import { IoShieldCheckmark } from "react-icons/io5";
-import { obtenerInformacionesHome, calcular_porcentaje_diferencia_entre_semana } from "../../../services/userService";
-import { obtenerToken } from "../../../services/cookiesServices";
+import { obtenerInformacionesHome, calcular_porcentaje_diferencia_entre_semana,crear_reporte_backoffice } from "../../../../services/userService";
+import { obtenerToken } from "../../../../services/cookiesServices";
 import { useEffect, useState } from "react";
 import { BsBinoculars } from "react-icons/bs";
-import PieChartWithTotal from "../components/graficoDonaUsuario";
+import { FaFileExcel } from "react-icons/fa6";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import PieChartWithTotal from "../../components/graficoDonaUsuario";
+import { obtenerRolUsuario } from "../../../../services/cookiesServices";
 
 
 export default function Home() {
@@ -14,6 +19,7 @@ export default function Home() {
   const [informacionesSemanaPasada, setInformacionesSemanaPasada] = useState([]);
   const [informacionesGraficoUsuarios, setInformacionesGraficoUsuarios] = useState([]);
   const [informacionesGraficoMateriales, setInformacionesGraficoMateriales] = useState([]);
+  const [botonDescargarActivo, setBotonDescargarActivo] = useState(true);
 
   useEffect(() => {
     obtenerInformacionesHome(obtenerToken()).then((response) => {
@@ -29,11 +35,72 @@ export default function Home() {
     });
   }, []);
 
+  const showToast = async (promise, mensaje) => {
+          return toast.promise(
+            promise,
+            {
+              pending: mensaje,
+            },
+            { position: "top-center", autoClose: 2000, className: "w-auto" }
+          );
+        };
+
+  if(obtenerRolUsuario() != "3" && obtenerRolUsuario() != "2"){
+    // Notify the user that they don't have permission to access this section
+    // Add buttons to redirect to the home page or to log out
+    alert("No tienes permiso para acceder a la sección de Inicio");
+    if (obtenerRolUsuario() === "4") {
+      window.location.href = "/servicios";
+    } else {
+      location.href = "/login";
+    }
+    return null
+  }
+
+  if (informacionesSemanaActual.length === 0 || informacionesSemanaPasada.length === 0 || informacionesGraficoUsuarios.length === 0 || informacionesGraficoMateriales.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-4 border-b-4 border-[#75b57d]"></div>
+      </div>
+    );
+  }
+
+  const descargarReporte = () => {
+    setBotonDescargarActivo(false);
+    showToast(crear_reporte_backoffice(obtenerToken()), "Creando Archivo...").then((response) => {
+      if(response.status === 200){
+        console.log("Reporte creado con éxito");
+
+        const base64File = response.data.filebase64;  // Ajusta esto según la estructura de tu respuesta
+        // Crear un enlace de descarga
+        const downloadLink = document.createElement('a');
+        downloadLink.href = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${base64File}`;
+        downloadLink.download = 'Reporte_Estadisticas.xlsx'; // Nombre del archivo a descargar
+        downloadLink.click();  // Simula el clic para iniciar la descarga  
+
+        console.log(response);
+      }else{
+        console.log("Error al crear el reporte");
+      }
+    });
+    setBotonDescargarActivo(true);
+  }
+
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-colorResumen">
+      <ToastContainer />
       <div className="h-[45%] bg-greenBackground items-center relative">
         <h2 className="text-xl text-letterColor font-bold ml-12 mt-8">Inicio</h2>
+        <button 
+          className="text-white absolute top-8 right-8 font-medium bg-blueBoton hover:bg-blueOscuro rounded-lg p-2 flex items-center justify-center h-[40px] transition-colors duration-300" 
+          onClick={() => descargarReporte()}
+          style={{backgroundColor: botonDescargarActivo ? "#3E86B9" : "#BEBFC0"}}
+          disabled={!botonDescargarActivo}
+          >
+            <FaFileExcel className="text-white w-6 h-6 mr-2"/>
+            Descargar Reporte de Estadisticas
+          </button>
         <div className="flex items-center mt-8 justify-center space-x-8">
 
           <div className="bg-colorResumen w-[22%] py-4 rounded-lg flex flex-col">
@@ -120,7 +187,7 @@ export default function Home() {
             <div className="flex items-center justify-between px-6">
               <div className="flex flex-col">
                 <h3 className="text-xs font-bold text-customBlue">REPORTES RESUELTOS</h3>
-                <p className="text-xl font-bold text-blueInactive mt-1">36</p>
+                <p className="text-xl font-bold text-blueInactive mt-1">{informacionesSemanaActual?.total_reportes_resueltos}</p>
               </div>
               <div className="rounded-full w-11 h-11 bg-blueReport flex items-center justify-center mt-[-8px] ml-[10px]">
                 <IoShieldCheckmark className="text-white w-[55%] h-[55%]"></IoShieldCheckmark>
@@ -128,7 +195,13 @@ export default function Home() {
             </div>
             <div className="flex items-center text-xs ml-6 mt-1">
               <FaArrowUp className="text-greenLetter"/>
-              <p className="font-bold text-greenLetter ml-2">1.29%</p>
+              <p 
+                className="font-bold ml-2"
+                style={{color: calcular_porcentaje_diferencia_entre_semana(informacionesSemanaActual?.total_reportes_resueltos, informacionesSemanaPasada?.reportes_resueltos) >= 0 ? "#19A274" : "#FF4A4A"}}
+                >
+                  {calcular_porcentaje_diferencia_entre_semana(informacionesSemanaActual?.total_reportes_resueltos, informacionesSemanaPasada?.reportes_resueltos)}%
+                  {/* 1.29% */}
+                </p>
               <p className="ml-2 text-greenLetter2">Desde la semana pasada</p>
             </div>
           </div>

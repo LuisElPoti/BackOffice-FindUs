@@ -2,15 +2,16 @@
 import React, { useState, useEffect } from "react";
 import Popup from "reactjs-popup";
 import 'reactjs-popup/dist/index.css';
-import { obtenerCategoriaMaterial } from "../../../services/categoriasServices";
+import { obtenerCategoriaMaterial } from "../../../../services/categoriasServices";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import {crearRecursoEducativo} from "../../../services/materialEducativoServices";
+import {crearRecursoEducativo} from "../../../../services/materialEducativoServices";
 import { toast,ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { convertToBase64 } from "../../../services/filesServices";
-import TablaMaterialEducativo from "../components/tablaMaterialEducativo";
-import ModalAdentroMaterialEducativo from "../components/modalAdentroMaterialEducativo";
+import { convertToBase64 } from "../../../../services/filesServices";
+import TablaMaterialEducativo from "../../components/tablaMaterialEducativo";
+import ModalAdentroMaterialEducativo from "../../components/modalAdentroMaterialEducativo";
+import { obtenerRolUsuario } from "../../../../services/cookiesServices";
 
 export default function Material() {
     const [modalVisible, setModalVisible] = useState({mostrar: false, id: undefined});
@@ -193,6 +194,18 @@ export default function Material() {
             );
         }
     };
+
+    if(obtenerRolUsuario() != "2" && obtenerRolUsuario() != "3"){
+        // Notify the user that they don't have permission to access this section
+        // Add buttons to redirect to the home page or to log out
+        alert("No tienes permiso para acceder a la sección de Material Educativo");
+        if (obtenerRolUsuario() === "4") {
+            window.location.href = "/servicios";
+        } else {
+            window.location.href = "/login";
+        }
+        return null
+    }
 
     return (
         <div className="flex flex-col h-screen overflow-hidden bg-50-50-vertical">

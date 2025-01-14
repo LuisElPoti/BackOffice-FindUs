@@ -7,7 +7,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { IoMdMore } from "react-icons/io";
-import { obtenerDesaparecidosTabla, activarPublicacion, desactivarPublicacion, verificarPublicacion } from '../../../services/publicacionServices';
+import { obtenerDesaparecidosTabla, activarPublicacion, desactivarPublicacion, verificarPublicacion, cerrarPublicacion } from '../../../services/publicacionServices';
 import { obtenerEstadosPublicaciones } from '../../../services/categoriasServices';
 import { TableFooter, TablePagination, CircularProgress, Menu, MenuItem, Modal } from '@mui/material';
 import TablePaginationActions from './tableActionsComponent'; 
@@ -46,7 +46,7 @@ export default function TablaPublicaciones({ headers, onRowClick,className, hand
     const [selectedPublicacion, setSelectedPublicacion] = useState({idPublicacion: null, idEstado: null, nombre: null,verificado: null});
     const [openModalDesAct, setOpenModalDesAct] = useState({abrir: false, idPublicacion: null, activado: true, nombrePublicacion: null});
     const [openModalVerificar, setOpenModalVerificar] = useState({abrir: false, idPublicacion: null, activado: null, verificado: null, nombrePublicacion: null});
-
+    const [openModalCerrar, setOpenModalCerrar] = useState({abrir: false, idPublicacion: null, activado: null, nombrePublicacion: null});
 
     const formatearFecha = (fecha) => {
         const fechaFormatear = new Date(fecha);
@@ -163,6 +163,16 @@ export default function TablaPublicaciones({ headers, onRowClick,className, hand
         });
         handleClose();
     };
+    const handleCerrarPublicacion = () => {
+        console.log('Cerrando publicación:', selectedPublicacion);
+        setOpenModalCerrar({
+            abrir: true,
+            idPublicacion: selectedPublicacion?.idPublicacion,
+            activado: selectedPublicacion?.idEstado == 1,
+            nombrePublicacion: selectedPublicacion?.nombre
+        });
+        handleClose();
+    }
 
     const handleVerify = () => {
         console.log('Verificando publicación:', selectedPublicacion);
@@ -338,9 +348,9 @@ export default function TablaPublicaciones({ headers, onRowClick,className, hand
                                                 <div 
                                                     className='text-xs border px-0.5 py-1 rounded-sm'
                                                     style={{ 
-                                                        backgroundColor: publicacion?.estado?.id == 1 ? '#F3F7FD' : '#ffe2e2' ,
-                                                        color: publicacion?.estado?.id == 1 ? '#2E5AAC' : '#EF4444',
-                                                        borderColor: publicacion?.estado?.id == 1 ? '#2E5AAC' : '#EF4444',
+                                                        backgroundColor: publicacion?.estado?.id == 1 ? '#F3F7FD' : '#F3F7FD' , //#ffe2e2
+                                                        color: publicacion?.estado?.id == 1 ? '#2E5AAC' : '#717171', // #EF4444
+                                                        borderColor: publicacion?.estado?.id == 1 ? '#2E5AAC' : '#CCCCCD', //#EF4444
                                                     }}
                                                 >
                                                     {publicacion?.estado?.nombreestado}
@@ -366,9 +376,17 @@ export default function TablaPublicaciones({ headers, onRowClick,className, hand
                                                     {selectedPublicacion?.idEstado == 1 &&(
                                                         <MenuItem onClick={handleEdit}>Editar Publicación</MenuItem>
                                                     )}
-                                                    <MenuItem onClick={handleDeactivate}>{(selectedPublicacion?.idEstado == 1 ) ? "Desactivar Publicación" : "Activar Publicación"}</MenuItem>
+
+                                                    {selectedPublicacion?.idEstado != 4 && selectedPublicacion?.idEstado != 5  &&(
+                                                        <MenuItem onClick={handleDeactivate}>{(selectedPublicacion?.idEstado == 1 ) ? "Desactivar Publicación" : "Activar Publicación"}</MenuItem>
+                                                    )}
+
                                                     {(!selectedPublicacion?.verificado && selectedPublicacion?.verificado !== null && selectedPublicacion?.idEstado === 1) && (
                                                         <MenuItem onClick={handleVerify}>Verificar Publicacion</MenuItem>
+                                                    )}
+
+                                                    {selectedPublicacion?.idEstado == 1 &&(
+                                                        <MenuItem onClick={handleCerrarPublicacion}>Cerrar Publicacion</MenuItem>
                                                     )}
                                                 </Menu>
                                             </TableCell>
@@ -428,6 +446,14 @@ export default function TablaPublicaciones({ headers, onRowClick,className, hand
                     activado={openModalVerificar?.activado}
                     idPublicacion={openModalVerificar?.idPublicacion}
                     nombrePublicacion={openModalVerificar?.nombrePublicacion}
+                    setActualizar={setNuevaPublicacion}
+                />
+
+                <ModalSeleccionarEstado
+                    open={openModalCerrar?.abrir} 
+                    handleClose={() => setOpenModalCerrar({abrir: false, idPublicacion: null, activado: null, nombrePublicacion: null})} 
+                    idPublicacion={openModalCerrar?.idPublicacion}
+                    nombrePublicacion={openModalCerrar?.nombrePublicacion}
                     setActualizar={setNuevaPublicacion}
                 />
                 
@@ -561,6 +587,75 @@ function ModalVerificarPublicacion({open, handleClose, activado, nombrePublicaci
                 {/* ) : (
                     <p className='text-[#233E58] mt-8 px-6 text-xl'>¿Está seguro que desea cambiar el estado de la publicación de <strong>{nombrePublicacion} - ID: {idPublicacion}</strong> de <strong>Desactivada</strong> a <strong>Activada</strong>?</p>
                 )} */}
+
+                <div className='flex flex-row justify-center items-center mt-8'>
+                    <button
+                        className='bg-[#233E58] text-white font-bold py-2 px-4 rounded-md mx-2'
+                        onClick={handleConfirm}
+                    >
+                        Confirmar
+                    </button>
+                    <button
+                        className='bg-[#E53E3E] text-white font-bold py-2 px-4 rounded-md mx-2'
+                        onClick={handleClose}
+                    >
+                        Cancelar
+                    </button>
+                </div>
+            </div>   
+        </Modal>
+    )
+}
+
+function ModalSeleccionarEstado({open, handleClose, nombrePublicacion, idPublicacion,setActualizar}){
+    
+    const showToast = async (promise, mensaje) => {
+        return toast.promise(
+          promise,
+          {
+            pending: mensaje,
+          },
+          { position: "top-center", autoClose: 2000, className: "w-auto" }
+        );
+      };
+
+    const [estado, setEstado] = useState(1);
+
+    const handleConfirm = () => {
+        showToast(cerrarPublicacion(idPublicacion, estado),"Cerrando Publicación...").then((response) => {
+            handleClose();
+            if (response.status === 200) {
+                toast.success("Publicación Cerrada", { position: "top-center", autoClose: 2000, className: "w-auto" });
+                console.log("Publicación Cerrada",response);
+                setActualizar(true);
+            }
+            else{
+                toast.error("Error al cerrar la publicación", { position: "top-center", autoClose: 2000, className: "w-auto" });
+            }
+        }).catch((error) => {
+            toast.error("Error al cerrar la publicación", { position: "top-center", autoClose: 2000, className: "w-auto" });
+            console.log(error);
+        });
+    }
+
+
+    return (
+        <Modal open={open} onClose={handleClose} className='content-center'>
+            <div
+                className='flex flex-col justify-center items-center self-center mx-auto content-center w-[35vw] bg-white rounded-lg p-4'
+            >
+                <h1 className='w-full text-center text-3xl font-extrabold text-[#233E58] mt-4 pl-3'>Seleccionar Estado de Publicación</h1>
+                <select
+                    className="w-[70%] mt-[2vh] px-2 py-2 rounded-lg font-medium text-gray-500 bg-[#e1e8eb] border-[#737171] border-[1px] placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                    type="text"
+                    name="IdTipoDocumento"
+                    value={estado}
+                    onChange={(e) => setEstado(e.target.value)}
+                >
+                    <option value="1">Cerrado - Resuelto</option>
+                    <option value="2">Cerrado - No Resuelto</option>
+                </select>
+                <p className='text-[#233E58] mt-3 px-6 text-xl'>¿Está seguro que desea cambiar el estado de la publicación de <strong>{nombrePublicacion} - ID: {idPublicacion}</strong> con el estado de <strong>{estado == 1 ? "Cerrado - Resuelto" : "Cerrado - No Resuelto"}</strong>?</p>
 
                 <div className='flex flex-row justify-center items-center mt-8'>
                     <button

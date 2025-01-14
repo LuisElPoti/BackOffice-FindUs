@@ -298,9 +298,9 @@ export default function TablaMaterialEducativo({ headers, onRowClick,className,n
                                                 <div 
                                                     className='text-xs border px-0.5 py-1 rounded-sm'
                                                     style={{ 
-                                                        backgroundColor: material?.estado?.id == 1 ? '#F3F7FD' : '#ffe2e2' ,
-                                                        color: material?.estado?.id == 1 ? '#2E5AAC' : '#EF4444',
-                                                        borderColor: material?.estado?.id == 1 ? '#2E5AAC' : '#EF4444',
+                                                        backgroundColor: material?.estado?.id == 1 ? '#F3F7FD' : '#F3F7FD' ,
+                                                        color: material?.estado?.id == 1 ? '#2E5AAC' : '#717171',
+                                                        borderColor: material?.estado?.id == 1 ? '#2E5AAC' : '#CCCCCD',
                                                     }}
                                                 >
                                                     {material?.estado?.nombreestado}
