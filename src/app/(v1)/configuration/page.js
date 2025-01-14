@@ -1,15 +1,17 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import { AiOutlineSetting } from 'react-icons/ai';
 import { FaLanguage, FaUser, FaLock } from 'react-icons/fa';
 import Avatar from '@mui/material/Avatar';
-import { obtenerInfoUserPerfilBD, extraerEdad } from "../../../services/userService.js";
-import {obtenerToken} from "../../../services/cookiesServices.js";
-import FotoPerfirDefault from "../../../public/assets/profilePicture.svg";
-import { formatearFecha } from "../../../services/publicacionServices.js";
+import { obtenerInfoUserPerfilBD, extraerEdad } from "../../../../services/userService.js";
+import {obtenerToken} from "../../../../services/cookiesServices.js";
+import FotoPerfirDefault from "../../../../public/assets/profilePicture.svg";
+import { formatearFecha } from "../../../../services/publicacionServices.js";
+import { CircularProgress } from "@mui/material";
 
 export default function Configuracion() {
     // Estado para rastrear la sección seleccionada
-    const [selectedSection, setSelectedSection] = useState("general");
+    const [selectedSection, setSelectedSection] = useState("perfil");
     const [password, setPassword] = useState('');
     const [validations, setValidations] = useState({
         minLength: false,
@@ -17,8 +19,8 @@ export default function Configuracion() {
         hasNumber: false,
         hasValidSymbols: false,
     });
-    const [userData, setUserData] = useState({});
-    const [userStatistics, setUserStatistics] = useState({});
+    const [userData, setUserData] = useState(null);
+    const [userStatistics, setUserStatistics] = useState(null);
     const [loading, setLoading] = useState(true);
 
 
@@ -54,6 +56,14 @@ export default function Configuracion() {
         });
     };
 
+    if (userData === null || userStatistics === null) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+              <div className="animate-spin rounded-full h-32 w-32 border-t-4 border-b-4 border-[#75b57d]"></div>
+            </div>
+          );
+    }
+
     return (
         <div className="flex flex-col h-screen overflow-hidden bg-colorResumen">
             <div className="h-[45%] bg-greenBackground items-center relative">
@@ -67,7 +77,7 @@ export default function Configuracion() {
                     >
                         <FaUser className="w-5 h-5 inline-block" /> Perfil
                     </button>
-                    <button
+                    {/* <button
                         className={`py-2 px-4 rounded-md ${selectedSection === "general" ? "bg-blueOscuro text-white" : "bg-white text-customBlue"}`}
                         onClick={() => setSelectedSection("general")}
                     >
@@ -84,7 +94,7 @@ export default function Configuracion() {
                         onClick={() => setSelectedSection("seguridad")}
                     >
                         <FaLock className="w-5 h-5 inline-block" /> Seguridad
-                    </button>
+                    </button> */}
                 </div>
 
                 {/* Contenido basado en la sección seleccionada, centrado */}
@@ -111,7 +121,7 @@ export default function Configuracion() {
                         </div>
                     )}
 
-                    {selectedSection === "perfil" && (
+                    {selectedSection === "perfil" && !loading ? (
                         <div className="bg-colorResumen shadow-md rounded-md p-4 mb-4 w-3/4">
                             <div className="flex flex-col items-start mb-2">
                             <Avatar src={userData?.urlfotoperfil} sx={{ width: 70, height: 70 }}/>
@@ -156,6 +166,11 @@ export default function Configuracion() {
                                     <p className="text-xl font-bold text-blueOscuro">{userStatistics?.totalComentariosHechos}</p>
                                 </div>
                             </div>
+                        </div>
+                    ): loading && (
+                        <div className="flex flex-col items-center bg-colorResumen rounded-md p-4 mb-4 w-3/4 shadow-md">
+                            <CircularProgress />
+                            <p className="text-gray-700 mt-4">Cargando información del perfil...</p>
                         </div>
                     )}
 

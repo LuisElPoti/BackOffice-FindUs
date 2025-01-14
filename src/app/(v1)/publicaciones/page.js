@@ -5,26 +5,27 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { Player } from "@lottiefiles/react-lottie-player";
 import OtpInput from "react-otp-input";
-import { obtenerTiposDocumentos } from "../../../services/catalogoServices";
+import { obtenerTiposDocumentos } from "../../../../services/catalogoServices";
 import {
   registrarUsuario,
   formato_nombres,
   confirmarCorreo,
-} from "../../../services/userService";
+} from "../../../../services/userService";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { crearPublicacion, obtenerInformacionEditarPublicacionBO, actualizarPublicacionBO } from "../../../services/publicacionServices";
-import { subirArchivo, actualizarArchivoPubicacionBO, actualizarFotoPublicacionBO } from "../../../services/uploadFileServices";
-import { obtenerToken } from "../../../services/cookiesServices";
+import { crearPublicacion, obtenerInformacionEditarPublicacionBO, actualizarPublicacionBO } from "../../../../services/publicacionServices";
+import { subirArchivo, actualizarArchivoPubicacionBO, actualizarFotoPublicacionBO } from "../../../../services/uploadFileServices";
+import { obtenerToken } from "../../../../services/cookiesServices";
 import Mapa from "@/app/components/map";
 import Popup from "reactjs-popup";
 import 'reactjs-popup/dist/index.css';
 import { FaEdit, FaCheck, FaTimes } from 'react-icons/fa'; // Import icons for edit, check, and cancel
-import TablaPublicaciones from "../components/tablePublicaciones";
-import ModalAdentroPublicaciones from "../components/modalAdentroPublicaciones";
-import { Modal } from "@mui/material";
-import {CircularProgress } from '@mui/material'
+import TablaPublicaciones from "../../components/tablePublicaciones";
+import ModalAdentroPublicaciones from "../../components/modalAdentroPublicaciones";
+import { Modal, CircularProgress } from "@mui/material";
+import { obtenerRolUsuario } from "../../../../services/cookiesServices";
+
 
 export default function Publicaciones() {
   const router = useRouter();
@@ -403,26 +404,6 @@ export default function Publicaciones() {
     });
   };
 
-  //   useEffect(() => {
-  //     console.log("Respuesta de la petición:", apiResponse);
-  //     if (apiResponse?.status == 200) {
-  //       toast.success("Publicación creada correctamente", {
-  //         position: "top-center",
-  //         autoClose: 2000,
-  //         className: "w-auto",
-  //       });
-  //       setTimeout(() => {
-  //         router.push("/publicaciones");
-  //       }, 5000);
-  //     } else {
-  //       toast.error("Error al crear la publicación", {
-  //         position: "top-center",
-  //         autoClose: 5000,
-  //         className: "w-auto",
-  //       });
-  //     }
-  //     setSendingPublicacionData(false);
-  //   }, [apiResponse]);
 
   const onPopupClose = () => {
     setExpandedSection(null)
@@ -435,6 +416,19 @@ export default function Publicaciones() {
     resetInitialValues()
 
   }
+
+  if(obtenerRolUsuario() != "2" && obtenerRolUsuario() != "3"){
+    // Notify the user that they don't have permission to access this section
+    // Add buttons to redirect to the home page or to log out
+    alert("No tienes permiso para acceder a la sección de Publicaciones");
+    if (obtenerRolUsuario() === "4") {
+      window.location.href = "/servicios";
+    } else {
+      location.href = "/login";
+    }
+    return null
+  }
+
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-50-50-vertical">
       {/* <div className="h-[45%] bg-greenBackground relative"> */}
