@@ -12,6 +12,7 @@ import { MdOutlineVerified } from "react-icons/md";
 import { obtenerFotoPerfil, obtenerNombreUsuario, obtenerToken } from "../../../services/cookiesServices";
 import { IoIosMore, IoMdClose } from "react-icons/io";
 import { GiCancel } from "react-icons/gi";
+import { formatearFechaComentario } from "../../../services/publicacionServices";
 
 export default function ModalAdentroPublicaciones({ open, handleClose, idPublicacion=undefined }) {
     const [openMap, setOpenMap] = useState(false);
@@ -104,7 +105,7 @@ export default function ModalAdentroPublicaciones({ open, handleClose, idPublica
                 fileName: values?.imageData?.fileName,
                 mimeType: values?.imageData?.mimeType
               }
-            showToast(crearAvistamiento({dataAvistamiento: datosAvistamiento, dataFoto: dataFoto}),"Creando avistamiento...").then((response) => {
+            showToast(crearAvistamiento({dataAvistamiento: datosAvistamiento, dataFoto: dataFoto},obtenerToken()),"Creando avistamiento...").then((response) => {
                 if(response.status === 200){
                     // console.log("Avistamiento creado correctamente: ", response.data);
                     // console.log("ID DEL AVISTAMIENTO: ", response.data.idAvistamiento);
@@ -209,8 +210,9 @@ export default function ModalAdentroPublicaciones({ open, handleClose, idPublica
                 <div className="flex flex-row mt-[3vh] h-[38vh] mx-3 bg-[#c5d7e8a5] px-5 py-3 rounded-md scrollbar-custom">
                     <div className="flex-col ">
                         <img
-                            src={publicacion?.fotospublicacion?.[0].urlarchivo}
+                            src={publicacion?.fotospublicacion?.[0]?.urlarchivo ? publicacion?.fotospublicacion?.[0].urlarchivo : "https://rmmjqtigwdgygmsibvuh.supabase.co/storage/v1/object/sign/assets/NO%20IMAGE%20AVAIBLE.jpg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJhc3NldHMvTk8gSU1BR0UgQVZBSUJMRS5qcGciLCJpYXQiOjE3MzYzNzk5OTYsImV4cCI6ODY1NzM2MjkzNTk2fQ.eGVLqSNxbTfMuGsLh9fREp2cUzxLVIQjdDoUxI4ptSo&t=2025-01-08T23%3A46%3A35.873Z"}
                             className="h-[80%] w-[25vw] rounded-md object-fill"
+                            alt="Imagen no Disponible"
                         />
                         <button className="bg-[#233E58] text-white rounded-md p-2 mt-[3%] flex items-center justify-center h-[14%] w-[100%] mx-auto">Ver reporte de la policía</button>
                     </div>
@@ -233,7 +235,7 @@ export default function ModalAdentroPublicaciones({ open, handleClose, idPublica
                 {/* Avistamientos */}
                 <div className="flex flex-row mt-[3vh] h-[48vh] mx-3 bg-[#c5d7e8a5] px-2 py-3 rounded-md">
                     <div className="flex flex-col ml-5 h-full rounded-md overflow-auto w-[55%] py-2 scrollbar-custom bg-[#c5d7e8a5] px-2">
-                        <h2 className="text-2xl font-bold text-[#233E58] text-center ">Avistamientos de William Chawllfer Ferreira Rosado</h2>
+                        <h2 className="text-2xl font-bold text-[#233E58] text-center ">Avistamientos de {publicacion?.nombredesaparecido}</h2>
                         <div className="flex flex-col mt-[2vh] mx-[3%] bg-[#c5d7e8a5] px-5 py-3 rounded-md">
                             {publicacion?.avistamiento?.length >0 ? (
                                 publicacion?.avistamiento?.map((avistamiento, index) => (
@@ -384,7 +386,7 @@ export default function ModalAdentroPublicaciones({ open, handleClose, idPublica
                 <div className="flex flex-row mt-[3vh] w-[70%] h-[48vh] mx-auto bg-[#c5d7e8a5] px-5 py-3 rounded-md">
                     <div className="flex flex-col h-full rounded-md overflow-auto py-2 scrollbar-custom w-full">
                         <h2 className="text-2xl font-bold text-[#233E58] text-center ">Comentarios</h2>
-                        <HacerComentario idPublicacion={publicacion?.id}/>
+                        <HacerComentario idPublicacion={publicacion?.id} publicacion={publicacion} setPublicacion={setPublicacion}/>
                         {publicacion?.comentario?.length >0 ? (
                             publicacion?.comentario?.map((comentario, index) => (
                                 <ComentarioCard
@@ -392,6 +394,7 @@ export default function ModalAdentroPublicaciones({ open, handleClose, idPublica
                                     fotoPersona={comentario.usuario.urlfotoperfil}
                                     nombrePersona={comentario.usuario.nombre + " " + comentario.usuario.apellido}
                                     // fechaComentario={formatearFecha(comentario.fechacomentario)}
+                                    fechaComentario={formatearFechaComentario(comentario.fechacreacion)}
                                     comentario={comentario.texto}
                                 />
                             ))
@@ -491,13 +494,15 @@ function HacerComentario({idPublicacion, publicacion, setPublicacion}){
     // ,[comentario]);
 
     const handlePublicarComentario = (comentario,idpublicacion) => {
-        mandandoComentario(true);
+        setMandandoComentario(true);
         setLoading(true);
         crearComentario({idpublicacion: idpublicacion, texto: comentario},obtenerToken()).then((response) => {
+            try {
             console.log("RESPONSE",response);
             if(response?.status === 200){
                 console.log("Comentario creado correctamente: ", response.data);
-                setPublicacion({...publicacion, comentario: [response.data, ...publicacion.comentario]});
+                console.log("PUBLICACION",publicacion);
+                setPublicacion({...publicacion, comentario: [response.data, ...publicacion?.comentario]});
                 setComentario("");
 
             }else{
@@ -505,6 +510,12 @@ function HacerComentario({idPublicacion, publicacion, setPublicacion}){
             }
             setMandandoComentario(false);
             setLoading(false);
+        }catch(error){
+            console.log("ERROR EN EL HANDLE",error);
+            alert("Error al publicar el comentario");
+            setMandandoComentario(false);
+            setLoading(false);
+        }
         })
 
     }
@@ -643,7 +654,7 @@ function AvistamientoCard({fotoAvistamiento, lugarAvistamiento, descripcionAvist
                         )}
                             <MenuItem onClick={handleDeactivate}>{(selectedAvistamiento?.idEstado == 1 ) ? "Desactivar Avistamiento" : "Activar Avistamiento"}</MenuItem>
                             {(!selectedAvistamiento?.verificado && selectedAvistamiento?.verificado !== null && selectedAvistamiento?.idEstado === 1) && (
-                                <MenuItem onClick={handleVerify}>Verificar Publicacion</MenuItem>
+                                <MenuItem onClick={handleVerify}>Verificar Avistamiento</MenuItem>
                             )}
                         </>
                 ):
@@ -800,18 +811,18 @@ function ModalVerificarAvistamiento({open, handleClose, activado, nombreAvistami
       };
 
       const handleConfirm = () => {
-        showToast(verificarAvistamiento(idAvistamiento), "Verificando publicación...").then((response) => {
+        showToast(verificarAvistamiento(idAvistamiento), "Verificando avistamiento...").then((response) => {
             handleClose();
             if (response.status === 200) {
-                toast.success("Publicación Verificada", { position: "top-center", autoClose: 2000, className: "w-auto" });
+                toast.success("Avistamiento Verificado", { position: "top-center", autoClose: 2000, className: "w-auto" });
                 setActualizar({actualizar: true, idPublicacion: idPublicacion});
-                console.log("Publicación Verificada",response);
+                console.log("Avistamiento Verificado",response);
             }
             else{
-                toast.error("Error al verificar la publicación", { position: "top-center", autoClose: 2000, className: "w-auto" });
+                toast.error("Error al verificar el avistamiento", { position: "top-center", autoClose: 2000, className: "w-auto" });
             }
         }).catch((error) => {
-            toast.error("Error al verificar la publicación", { position: "top-center", autoClose: 2000, className: "w-auto" });
+            toast.error("Error al verificar el avistamiento", { position: "top-center", autoClose: 2000, className: "w-auto" });
             console.log(error);
         });
     }
@@ -822,7 +833,7 @@ function ModalVerificarAvistamiento({open, handleClose, activado, nombreAvistami
             <div
                 className='flex flex-col justify-center items-center self-center mx-auto content-center w-[35vw] bg-white rounded-lg p-4'
             >
-                <h1 className='w-full text-center text-3xl font-extrabold text-[#233E58] mt-4 pl-3'>Verificar Vericidad de Publicación</h1>
+                <h1 className='w-full text-center text-3xl font-extrabold text-[#233E58] mt-4 pl-3'>Verificar Vericidad del Avistamiento</h1>
                 {/* {activado  ? ( */}
                     {/* <> */}
                         <p className='text-[#233E58] mt-8 px-6 text-xl'>¿Está seguro que desea verificar la veracidad del avistamiento <strong>{nombreAvistamiento} - ID: {idAvistamiento}</strong>?</p>

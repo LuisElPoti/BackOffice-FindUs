@@ -13,13 +13,16 @@ const apiRoutes = {
     solicitarCambioContrasena: () => `${API_BASE_URL}/user/solicitar_cambio_contrasena`,
     verificar_codigo_cambio_contrasena: () => `${API_BASE_URL}/user/verificar_codigo_cambio_contrasena`,
     cambiar_contrasena: () => `${API_BASE_URL}/user/cambiar_contrasena`,
-    loginUsuario: () => `${API_BASE_URL}/user/login`,
+    loginUsuario: () => `${API_BASE_URL}/user/login_user_bo`,
     verificar_token_valido: () => `${API_BASE_URL}/user/verificar_token_valido`,
     obtenerUsuariosTabla: (page, limit) => `${API_BASE_URL}/user/obtenerUsuariosTabla/${page}/${limit}`,
     obtenerUsuarioByID: (id) => `${API_BASE_URL}/user/${id}`,
     actualizarAdminAUsuario: (id) => `${API_BASE_URL}/user/admin_update_user/${id}`,
     obtenerInformacionesHome: () =>  `${API_BASE_URL}/user/obtener_informaciones_home_bo/`,
     obtenerInfoUserPerfil: () => `${API_BASE_URL}/user/obtener_info_user_perfil/`,
+    verificarUsuarioLogueado: () => `${API_BASE_URL}/user/verificar_token_valido/`,
+    cerrarPublicacion: (id,tipoCierre) => `${API_BASE_URL}/desaparecido/cerrarPublicacion/${id}/${tipoCierre}`,
+    crearReporteBackoffice: () => `${API_BASE_URL}/user/crear_reporte_backoffice`,
 
 
     //Rutas Rol
@@ -48,7 +51,7 @@ const apiRoutes = {
     actualizarPublicacion: (id) => `${API_BASE_URL}/desaparecido/updateDesaparecido/${id}`,
     eliminarPublicacion: (id) => `${API_BASE_URL}/desaparecido/deleteDesaparecido/${id}`,
     obtenerDesaparecidosTabla: (page,limit) => `${API_BASE_URL}/desaparecido/obtenerDesaparecidoTabla/${page}/${limit}`,
-    obtenerInfoDesaparecidoByID: (id) => `${API_BASE_URL}/desaparecido/obtenerInfoDesaparecidoByID/${id}`,
+    obtenerInfoDesaparecidoByID: (id) => `${API_BASE_URL}/desaparecido/obtenerInfoDesaparecidoByID_BO/${id}`,
     crearComentarioPublicaciones: () => `${API_BASE_URL}/desaparecido/crearComentarioPublicaciones`,
     obtenerInformacionEditarPublicacionBO: (id) => `${API_BASE_URL}/desaparecido/obtenerInformacionEditarPublicacionBO/${id}`,
     actualizarPublicacionBO: (id) => `${API_BASE_URL}/desaparecido/actualizarDesaparecidoBO/${id}`,

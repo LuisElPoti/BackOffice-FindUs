@@ -1,4 +1,4 @@
-import React, { use, useEffect,useCallback } from 'react';
+import React, {useEffect,useCallback, useState } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -7,7 +7,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { IoMdMore } from "react-icons/io";
-import { useState } from 'react';
 import { obtenerUsuariosTabla, obtenerUsuarioByID, actualizarAdminAUsuario } from '../../../services/userService';
 import { obtenerRoles, obtenerEstadosGeneral } from '../../../services/catalogoServices';
 import { TableFooter, TablePagination, CircularProgress, Modal, TextField} from '@mui/material';
@@ -33,7 +32,7 @@ const rows = [
     // Add more rows if needed
 ];
 
-export default function TablaUsuarios({ headers, onRowClick,className }) {
+export default function TablaUsuarios({ headers, onRowClick,className, loadingData, setLoadingData }) {
     const [search, setSearch] = useState('');
     const [rol, setRol] = useState('-1');
     const [roles, setRoles] = useState([]);
@@ -112,7 +111,14 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
         const fechaFormatear = new Date(fecha);
         return `${fechaFormatear.getDate()}/${fechaFormatear.getMonth() + 1}/${fechaFormatear.getFullYear()}`;
     }
-    
+    useEffect(() => {
+        if (loading) {
+        setLoadingData(false);
+        } else {
+        setLoadingData(true);
+        }
+    }, [loading]);
+
     const obtenerData = useCallback(() => {
         setLoading(true);
         const filtrosSearch = search ? `&nombreCompleto=${search}` : '';
@@ -365,9 +371,9 @@ export default function TablaUsuarios({ headers, onRowClick,className }) {
                         <div 
                           className='text-xs border px-0.5 py-1 rounded-sm'
                           style={{ 
-                                backgroundColor: usuario?.estado?.id == 1 ? '#F3F7FD' : '#ffe2e2' ,
-                                color: usuario?.estado?.id == 1 ? '#2E5AAC' : '#EF4444',
-                                borderColor: usuario?.estado?.id == 1 ? '#2E5AAC' : '#EF4444',
+                                backgroundColor: usuario?.estado?.id == 1 ? '#F3F7FD' : '#F3F7FD' ,
+                                color: usuario?.estado?.id == 1 ? '#2E5AAC' : '#717171',
+                                borderColor: usuario?.estado?.id == 1 ? '#2E5AAC' : '#CCCCCD',
                           }}
                         >
                           {usuario?.estado?.nombreestado}

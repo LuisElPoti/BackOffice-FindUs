@@ -1,9 +1,13 @@
 import apiRoutes from "../api_paths";
 import axios from "axios";
 
-export const crearAvistamiento = async (data) => {
+export const crearAvistamiento = async (data, token) => {
     try {
-        const response = await axios.post(apiRoutes.crearAvistamiento(), data);
+        const response = await axios.post(apiRoutes.crearAvistamiento(), data, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
         return response;
     } catch (error) {
         console.error("Error en la petición:", error);

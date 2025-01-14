@@ -8,12 +8,21 @@ import { FaEye, FaEyeSlash} from "react-icons/fa6";
 import { toast, ToastContainer } from "react-toastify";
 import { login } from "../../../services/userService"; // Importa tu servicio de login
 import "react-toastify/dist/ReactToastify.css";
-import { guardarToken,eliminarDatosUsuario } from "../../../services/cookiesServices";
+import { guardarToken,eliminarDatosUsuario, obtenerToken, guardarRolUsuario, guardarIdUsuario , guardarNombreRolUsuario} from "../../../services/cookiesServices";
 
 export default function Login() {
   const router = useRouter();
   const [sendingData, setSendingData] = useState(false); // Estado para controlar la carga
   const [showPassword, setShowPassword] = useState(false);
+
+  const showToast = async (promise, mensaje) => {
+    return toast.promise(promise, {
+      pending: mensaje,
+      // success: 'Usuario registrado correctamente.',
+      // autoClose: 8000,
+    },{position: "top-center",className: "w-auto"});
+  };
+
 
   // Esquema de validación con Yup
   const validationSchema = Yup.object().shape({
@@ -31,16 +40,23 @@ export default function Login() {
       setSendingData(true);
 
       // Llamada al servicio de login
-      login(values)
+      showToast(login(values), "Validando credenciales...")
         .then((response) => {
           if (response.status === 200 && response.data.autenticado) {
             console.log("LOGIN",response.data);
             toast.success("Inicio de sesión exitoso", {position: "top-center",autoClose: 1000,className: "w-auto"});
             eliminarDatosUsuario();
             guardarToken(response.data.token);
-            
+            guardarRolUsuario(response.data.id_rol);
+            guardarIdUsuario(response.data.id_usuario);
+            guardarNombreRolUsuario(response.data.nombre_rol);
+
             setTimeout(() => {
-              router.push("/");
+              if (response.data.id_rol === 4) {
+                router.push("/servicios");
+              } else {
+                router.push("/home");
+              }
             },1000);
             
           } else {
@@ -85,13 +101,15 @@ export default function Login() {
               {formik.touched.email && formik.errors.email ? (
                 <div className="text-red-500 text-xs mt-1">{formik.errors.email}</div>
               ) : null}
-              <div className="mb-4"></div>
+              {/* <div className="mb-4"></div> */}
               <div className="mt-2">
-                <h3 className="text-1xl font-medium text-customBlue">Contraseña</h3>
               </div>
-              <div className="relative h-auto">
+              <div>
+              <h3 className="text-1xl font-medium text-customBlue mb-4">Contraseña</h3>
+              <div className="relative">
+                <div className="flex">
                 <input
-                  className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5"
+                  className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                   type={showPassword ? "text" : "password"}
                   placeholder="Ingresa tu contraseña"
                   name="contrasena"
@@ -102,14 +120,16 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={()=> {setShowPassword(!showPassword)}}
-                  className="absolute inset-y-0 right-0  items-center justify-center align-middle px-3 h-full"
+                  className="absolute inset-y-0 right-0 flex items-center px-3" //  items-center justify-center align-middle px-3 h-full
                 >
                   {showPassword ? (
-                    <FaEyeSlash className="h-5 w-5 mt-4 text-gray-500" aria-hidden="true" />
+                    <FaEyeSlash className="h-5 w-5 text-gray-500" aria-hidden="true" />
                   ) : (
                     <FaEye className="h-5 w-5 text-gray-500" aria-hidden="true" />
                   )}
                 </button>
+                </div>
+              </div>
               </div>
               {formik.touched.contrasena && formik.errors.contrasena ? (
                 <div className="text-red-500 text-xs mt-1">{formik.errors.contrasena}</div>

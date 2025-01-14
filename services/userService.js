@@ -34,7 +34,7 @@ const calcular_porcentaje_diferencia_entre_semana = (semana_actual, semana_pasad
     if (semana_pasada === 0) {
         return 100;
     }
-    return ((semana_actual - semana_pasada) / semana_pasada) * 100;
+    return (((semana_actual - semana_pasada) / semana_pasada) * 100).toFixed(2);
 }
 
 
@@ -183,6 +183,33 @@ const obtenerInfoUserPerfilBD = async (token) => {
     }
 }
 
+const validarUsuarioLogueado = async (token) => {
+    try {
+        const response = await axios.get(apiRoutes.verificarUsuarioLogueado(),{
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
+const crear_reporte_backoffice = async (token) => {
+    try {
+        const response = await axios.get(apiRoutes.crearReporteBackoffice(),{
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
+
 //Exportar funciones
 export {
     extraerEdad,
@@ -200,4 +227,6 @@ export {
     obtenerInformacionesHome,
     calcular_porcentaje_diferencia_entre_semana,
     obtenerInfoUserPerfilBD,
+    validarUsuarioLogueado,
+    crear_reporte_backoffice
 };
