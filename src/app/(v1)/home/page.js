@@ -45,17 +45,18 @@ export default function Home() {
           );
         };
 
-  if(obtenerRolUsuario() != "3" && obtenerRolUsuario() != "2"){
-    // Notify the user that they don't have permission to access this section
-    // Add buttons to redirect to the home page or to log out
-    alert("No tienes permiso para acceder a la sección de Inicio");
-    if (obtenerRolUsuario() === "4") {
-      window.location.href = "/servicios";
-    } else {
-      location.href = "/login";
+  useEffect(() => {
+    // Verifica el rol del usuario solo en el cliente
+    if (obtenerRolUsuario() !== "3" && obtenerRolUsuario() !== "2") {
+      alert("No tienes permisos para acceder a esta sección");
+
+      if (obtenerRolUsuario() === "4") {
+        window.location.href = "/servicios";
+      } else {
+        location.href = "/login";
+      }
     }
-    return null
-  }
+  }, []); // El arreglo vacío asegura que se ejecute solo una vez
 
   if (informacionesSemanaActual.length === 0 || informacionesSemanaPasada.length === 0 || informacionesGraficoUsuarios.length === 0 || informacionesGraficoMateriales.length === 0) {
     return (

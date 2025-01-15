@@ -417,6 +417,8 @@ export default function Publicaciones() {
 
   }
 
+  useEffect(() => {
+    // Verifica el rol del usuario solo en el cliente
   if(obtenerRolUsuario() != "2" && obtenerRolUsuario() != "3"){
     // Notify the user that they don't have permission to access this section
     // Add buttons to redirect to the home page or to log out
@@ -426,7 +428,12 @@ export default function Publicaciones() {
     } else {
       location.href = "/login";
     }
-    return null
+  }
+  }
+  ,[])
+
+  if(obtenerRolUsuario() != "2" && obtenerRolUsuario() != "3"){
+    return null;
   }
 
   return (

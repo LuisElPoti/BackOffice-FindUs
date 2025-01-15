@@ -195,18 +195,26 @@ export default function Material() {
         }
     };
 
-    if(obtenerRolUsuario() != "2" && obtenerRolUsuario() != "3"){
-        // Notify the user that they don't have permission to access this section
-        // Add buttons to redirect to the home page or to log out
-        alert("No tienes permiso para acceder a la sección de Material Educativo");
-        if (obtenerRolUsuario() === "4") {
-            window.location.href = "/servicios";
-        } else {
-            window.location.href = "/login";
+    useEffect(() => {
+        // Verifica el rol del usuario solo en el client
+        if(obtenerRolUsuario() != "2" && obtenerRolUsuario() != "3"){
+            // Notify the user that they don't have permission to access this section
+            // Add buttons to redirect to the home page or to log out
+            alert("No tienes permiso para acceder a la sección de Material Educativo");
+            if (obtenerRolUsuario() === "4") {
+                window.location.href = "/servicios";
+            } else {
+                window.location.href = "/login";
+            }
+            return null
         }
-        return null
-    }
+        }
+    , []);
 
+    if(obtenerRolUsuario() != "2" && obtenerRolUsuario() != "3"){
+        return null;
+      }
+    
     return (
         <div className="flex flex-col h-screen overflow-hidden bg-50-50-vertical">
             <ToastContainer />
