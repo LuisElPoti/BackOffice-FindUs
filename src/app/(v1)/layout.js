@@ -39,8 +39,9 @@ export default function RootLayout({ children }) {
         <div className="flex">
         <Sidebar verificarLogin={verificarUsuario}></Sidebar>
         <div className= "flex-1">
-          {loading ? <LoadingComponent /> :
-            children}
+          {/* {loading ? <LoadingComponent /> :
+            children} */}
+          {children}
         </div>
         </div>
   );
