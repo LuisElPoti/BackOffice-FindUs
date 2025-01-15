@@ -438,13 +438,13 @@ export default function Publicaciones() {
       {/* </div> */}
 
       <div className="absolute top-8 right-8 flex items-center">
-        <button className="text-white p-2 mr-4 flex items-center justify-center h-[40px]">
+        {/* <button className="text-white p-2 mr-4 flex items-center justify-center h-[40px]">
           <img
             src="/assets/buscar_button.png"
             alt="Search"
             className="w-[38px] h-[38px]"
           />
-        </button>
+        </button> */}
         <ToastContainer />
         <Popup
           trigger={
@@ -827,7 +827,7 @@ export default function Publicaciones() {
                   }}
                   className="bg-blueBoton hover:bg-blueOscuro text-white font-bold py-2 px-4 rounded"
                 >
-                  {sendingPublicacionData ? "Enviando..." : {editandoPublicacion} ? "Editar" : "Crear"}
+                  {sendingPublicacionData ? "Enviando..." : (editandoPublicacion.editando ? "Editar" : "Crear")}
                 </button>
               </div>
             </form>

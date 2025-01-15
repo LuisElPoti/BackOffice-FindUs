@@ -42,7 +42,7 @@ export default function Login() {
 
     if (token != null && token != '') {
       setAccessToken(token);
-      guardarToken(accessToken);
+      guardarToken(token);
       console.log('Token de acceso:', token);
     }else{
       setAccessToken('');

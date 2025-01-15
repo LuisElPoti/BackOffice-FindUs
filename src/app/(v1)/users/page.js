@@ -36,9 +36,9 @@ export default function Users() {
         </h2>
         <div className="absolute top-8 right-8 flex items-center">
             
-            <button className="text-white font-medium bg-blueBoton hover:bg-blueOscuro rounded-lg p-2 flex items-center justify-center h-[40px] transition-colors duration-300">
+            {/* <button className="text-white font-medium bg-blueBoton hover:bg-blueOscuro rounded-lg p-2 flex items-center justify-center h-[40px] transition-colors duration-300">
               Crear Usuario +
-            </button>
+            </button> */}
         </div>
         <div className="relative mt-[10vh]">
           {/* Pass the handleRowClick to MyTable to trigger the popup */}

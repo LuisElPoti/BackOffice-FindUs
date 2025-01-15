@@ -37,6 +37,18 @@ const calcular_porcentaje_diferencia_entre_semana = (semana_actual, semana_pasad
     return (((semana_actual - semana_pasada) / semana_pasada) * 100).toFixed(2);
 }
 
+const verificar_usuario_link = async (token) => {
+    try {
+        const response = await axios.post(apiRoutes.verificarUsuarioLink(), {}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
 
 
 //Funciones de comunicacion con el servidor
@@ -183,6 +195,20 @@ const obtenerInfoUserPerfilBD = async (token) => {
     }
 }
 
+export const cambiarFotoPerfilBD = async (data, token) => {
+    try {
+        const response = await axios.put(apiRoutes.cambiarFotoPerfil(), data,{
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response;
+    } catch (error) {
+        return error.response;
+    }
+}
+
+
 const validarUsuarioLogueado = async (token) => {
     try {
         const response = await axios.get(apiRoutes.verificarUsuarioLogueado(),{
@@ -228,5 +254,6 @@ export {
     calcular_porcentaje_diferencia_entre_semana,
     obtenerInfoUserPerfilBD,
     validarUsuarioLogueado,
-    crear_reporte_backoffice
+    crear_reporte_backoffice,
+    verificar_usuario_link
 };

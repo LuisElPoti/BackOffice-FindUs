@@ -14,7 +14,7 @@ import { IoIosMore, IoMdClose } from "react-icons/io";
 import { GiCancel } from "react-icons/gi";
 import { formatearFechaComentario } from "../../../services/publicacionServices";
 
-export default function ModalAdentroPublicaciones({ open, handleClose, idPublicacion=undefined }) {
+export default function ModalAdentroPublicaciones({ open, handleClose, idPublicacion=undefined, servicio_emergencia=false }) {
     const [openMap, setOpenMap] = useState(false);
     const handleOpenMap = () => setOpenMap(true);
     const handleCloseMap = () => setOpenMap(false);
@@ -259,7 +259,7 @@ export default function ModalAdentroPublicaciones({ open, handleClose, idPublica
                             )}
                         </div>
                     </div>
-                    {publicacion?.estado?.id == 1 ? (
+                    {(publicacion?.estado?.id == 1&& !servicio_emergencia) ? (
                         <div
                             className="flex-1 flex-col ml-5 h-full rounded-md bg-[#c5d7e8a5] overflow-auto  py-2 px-1 scrollbar-custom"
                         >
@@ -368,7 +368,7 @@ export default function ModalAdentroPublicaciones({ open, handleClose, idPublica
                         >
                             <h2 className="text-2xl font-bold text-[#233E58] text-center">Reportar Avistamiento de {publicacion?.nombredesaparecido}</h2>
                             <div className="flex flex-col w-full h-full justify-center items-center align-middle content-center">
-                                <h2 className="text-lg font-bold text-[#233E58] text-center mb-2">No puedes reportar avistamientos de una publicación inactiva</h2>
+                                <h2 className="text-lg font-bold text-[#233E58] text-center mb-2">{(!servicio_emergencia) ? "No puedes reportar avistamientos de una publicación inactiva" : "No puedes reportar avistamiento siendo una persona del servicio de emergencia"}</h2>
                                 <GiCancel
                                     size={100}
                                     color="#c15250"
@@ -553,7 +553,7 @@ function HacerComentario({idPublicacion, publicacion, setPublicacion}){
     )
 }
 
-function AvistamientoCard({fotoAvistamiento, lugarAvistamiento, descripcionAvistamiento, quienloVio, cantItems,numItems,avistamiento, setActualizarAvistamientos, idPublicacion, publicacionActivada}){
+function AvistamientoCard({fotoAvistamiento, lugarAvistamiento, descripcionAvistamiento, quienloVio, cantItems,numItems,avistamiento, setActualizarAvistamientos, idPublicacion, publicacionActivada, servicio_emergencia}){
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedAvistamiento, setSelectedAvistamiento] = useState({idAvistamiento: null, idEstado: null, nombre: null, verificado: null});
     const [openModalDesAct, setOpenModalDesAct] = useState({abrir: false, idAvistamiento: null, activado: null, nombreAvistamiento: null});
@@ -649,17 +649,23 @@ function AvistamientoCard({fotoAvistamiento, lugarAvistamiento, descripcionAvist
                 >
                     {publicacionActivada  ?  (
                         <>
-                        { selectedAvistamiento?.idEstado === 1 && (
+                        { (selectedAvistamiento?.idEstado === 1 && !servicio_emergencia) && (
                             <MenuItem onClick={handleEdit}>Editar Avistamiento</MenuItem>
                         )}
-                            <MenuItem onClick={handleDeactivate}>{(selectedAvistamiento?.idEstado == 1 ) ? "Desactivar Avistamiento" : "Activar Avistamiento"}</MenuItem>
-                            {(!selectedAvistamiento?.verificado && selectedAvistamiento?.verificado !== null && selectedAvistamiento?.idEstado === 1) && (
+                            { (!servicio_emergencia) && 
+                                <MenuItem onClick={handleDeactivate}>{(selectedAvistamiento?.idEstado == 1 ) ? "Desactivar Avistamiento" : "Activar Avistamiento"}</MenuItem>
+                            }
+                            {(!selectedAvistamiento?.verificado && selectedAvistamiento?.verificado !== null && selectedAvistamiento?.idEstado === 1  && !servicio_emergencia) && (
                                 <MenuItem onClick={handleVerify}>Verificar Avistamiento</MenuItem>
                             )}
                         </>
                 ):
                  (
-                    <MenuItem onClick={handleClose}>Publicacion o Avistamiento No Activa. No se puede realizar ninguna acción</MenuItem>
+                    <>
+                    { (!servicio_emergencia) && (
+                        <MenuItem onClick={handleClose}>Publicacion o Avistamiento No Activa. No se puede realizar ninguna acción</MenuItem>
+                    )}
+                 </>
                 )}
                 </Menu>
             </div>
