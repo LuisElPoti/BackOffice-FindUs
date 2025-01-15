@@ -2,32 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+.scrollbar-custom {
+    scrollbar-width: thin; /* Para Firefox */
+    scrollbar-color: rgba(0, 0, 0, 0.5) transparent; /* Ajusta el color para asegurar que sea visible */
+    scrollbar-arrow-color: transparent; /* Oculta las flechas */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+.scrollbar-custom::-webkit-scrollbar {
+    width: 8px; /* Ancho del scrollbar */
+    height: 8px; /* Alto del scrollbar */
+    background-color: transparent; /* Fondo transparente */
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+.scrollbar-custom::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.5); /* Color semitransparente del thumb */
+    border-radius: 3px; /* Bordes redondeados */
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+.scrollbar-custom::-webkit-scrollbar-track {
+    background: transparent; /* Fondo transparente del track */
+    border-radius: 8px; /* Bordes redondeados */
+}
+
+/* Oculta completamente las flechas */
+.scrollbar-custom::-webkit-scrollbar-button:single-button {
+    display: none; /* Oculta las flechas */
+    width: 0;
+    height: 0;
 }
