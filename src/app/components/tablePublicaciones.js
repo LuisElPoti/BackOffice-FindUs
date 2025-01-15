@@ -31,7 +31,7 @@ const rows = [
     // Add more rows if needed
 ];
 
-export default function TablaPublicaciones({ headers, onRowClick,className, handleEditandoPublicacion,nuevaPublicacion, setNuevaPublicacion }) {
+export default function TablaPublicaciones({ headers, onRowClick,className, handleEditandoPublicacion,nuevaPublicacion, setNuevaPublicacion, servicio_emergencia=false }) {
     const [anchorEl, setAnchorEl] = useState(null);
     const [search, setSearch] = useState('');
     const [fechaDesde, setFechaDesde] = useState(null);
@@ -60,7 +60,7 @@ export default function TablaPublicaciones({ headers, onRowClick,className, hand
         const filtrosFechaHasta = fechaHasta ? `&fechaHasta=${fechaHasta}` : '';
         const filtrosEstatus = (estatus && estatus != "-1") ? `&estatus=${estatus}` : '';
         const filtros = `${filtrosSearch}${filtrosFechaDesde}${filtrosFechaHasta}${filtrosEstatus}`;
-        obtenerDesaparecidosTabla(page, limit, filtros).then((response) => {
+        obtenerDesaparecidosTabla(page, limit, filtros,servicio_emergencia).then((response) => {
             console.log(response.data);
             setData(response.data);
             setLoading(false);
@@ -238,6 +238,7 @@ export default function TablaPublicaciones({ headers, onRowClick,className, hand
                 </div>
 
                     {/* Selector de Fecha Hasta*/}
+                    {!servicio_emergencia && (
                     <div className="flex items-center bg-[#f0f0f0] rounded-md p-2  w-auto">
                         <label className="text-sm text-gray-500">Estatus:</label>
                         <select
@@ -253,6 +254,7 @@ export default function TablaPublicaciones({ headers, onRowClick,className, hand
                             <option value="INACTIVO">Inactivo</option> */}
                         </select>
                 </div>
+                )}
 
                 {/* Botón de búsqueda */}
                     <button
@@ -373,19 +375,20 @@ export default function TablaPublicaciones({ headers, onRowClick,className, hand
                                                     }}
                                                 >
                                                     <MenuItem onClick={handleView}>Ver Publicación</MenuItem>
-                                                    {selectedPublicacion?.idEstado == 1 &&(
+                                                    
+                                                    {(selectedPublicacion?.idEstado == 1 && !servicio_emergencia) && (
                                                         <MenuItem onClick={handleEdit}>Editar Publicación</MenuItem>
                                                     )}
 
-                                                    {selectedPublicacion?.idEstado != 4 && selectedPublicacion?.idEstado != 5  &&(
+                                                    {(selectedPublicacion?.idEstado != 4 && !servicio_emergencia) && selectedPublicacion?.idEstado != 5  &&(
                                                         <MenuItem onClick={handleDeactivate}>{(selectedPublicacion?.idEstado == 1 ) ? "Desactivar Publicación" : "Activar Publicación"}</MenuItem>
                                                     )}
 
-                                                    {(!selectedPublicacion?.verificado && selectedPublicacion?.verificado !== null && selectedPublicacion?.idEstado === 1) && (
+                                                    {(!selectedPublicacion?.verificado && selectedPublicacion?.verificado !== null && selectedPublicacion?.idEstado === 1 && !servicio_emergencia) && (
                                                         <MenuItem onClick={handleVerify}>Verificar Publicacion</MenuItem>
                                                     )}
 
-                                                    {selectedPublicacion?.idEstado == 1 &&(
+                                                    {(selectedPublicacion?.idEstado == 1 && !servicio_emergencia) &&(
                                                         <MenuItem onClick={handleCerrarPublicacion}>Cerrar Publicacion</MenuItem>
                                                     )}
                                                 </Menu>

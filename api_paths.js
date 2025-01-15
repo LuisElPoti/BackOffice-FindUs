@@ -23,7 +23,8 @@ const apiRoutes = {
     verificarUsuarioLogueado: () => `${API_BASE_URL}/user/verificar_token_valido/`,
     cerrarPublicacion: (id,tipoCierre) => `${API_BASE_URL}/desaparecido/cerrarPublicacion/${id}/${tipoCierre}`,
     crearReporteBackoffice: () => `${API_BASE_URL}/user/crear_reporte_backoffice`,
-
+    verificarUsuarioLink: () => `${API_BASE_URL}/user/verificar_usuario_link`,
+    cambiarFotoPerfil: () => `${API_BASE_URL}/user/cambiar_foto_perfil`,
 
     //Rutas Rol
     obtenerRol: () => `${API_BASE_URL}/roles/obtenerRoles`,
@@ -50,7 +51,7 @@ const apiRoutes = {
     crearPublicacion: () => `${API_BASE_URL}/desaparecido/crearDesaparecido`,
     actualizarPublicacion: (id) => `${API_BASE_URL}/desaparecido/updateDesaparecido/${id}`,
     eliminarPublicacion: (id) => `${API_BASE_URL}/desaparecido/deleteDesaparecido/${id}`,
-    obtenerDesaparecidosTabla: (page,limit) => `${API_BASE_URL}/desaparecido/obtenerDesaparecidoTabla/${page}/${limit}`,
+    obtenerDesaparecidosTabla: (page,limit,servicios_emergencia) => `${API_BASE_URL}/desaparecido/obtenerDesaparecidoTabla/${page}/${limit}/${servicios_emergencia}`,
     obtenerInfoDesaparecidoByID: (id) => `${API_BASE_URL}/desaparecido/obtenerInfoDesaparecidoByID_BO/${id}`,
     crearComentarioPublicaciones: () => `${API_BASE_URL}/desaparecido/crearComentarioPublicaciones`,
     obtenerInformacionEditarPublicacionBO: (id) => `${API_BASE_URL}/desaparecido/obtenerInformacionEditarPublicacionBO/${id}`,

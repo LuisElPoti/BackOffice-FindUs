@@ -36,8 +36,6 @@ export default function RootLayout({ children }) {
   // }
 
   return (
-    <html lang="en">
-      <body className={inter.className}>
         <div className="flex">
         <Sidebar verificarLogin={verificarUsuario}></Sidebar>
         <div className= "flex-1">
@@ -45,8 +43,6 @@ export default function RootLayout({ children }) {
             children}
         </div>
         </div>
-      </body>
-    </html>
   );
 }
 

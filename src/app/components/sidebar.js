@@ -37,6 +37,18 @@ export default function SideBar({ verificarLogin }) {
         // setSelectedScreen(item);
     };
 
+    useEffect(() => {
+        // Función para actualizar el estado cuando cambie el localStorage
+        const handleStorageChange = () => {
+            const nuevaFotoPerfil = obtenerFotoPerfil();
+            setFotoPerfil(nuevaFotoPerfil);
+        };
+
+        // Escuchar el evento `storage` para cambios en el localStorage
+        window.addEventListener('storage', handleStorageChange);
+
+        // Limpiar el evento al desmontar el componente
+    }, [FotoPerfirDefault]);
     
     const tomarFotoPerfil = async () => {
         console.log("Obteniendo foto de perfil...");
