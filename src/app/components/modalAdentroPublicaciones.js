@@ -28,7 +28,7 @@ export default function ModalAdentroPublicaciones({ open, handleClose, idPublica
         if(actualizarAvistamientos?.actualizar){
             obtenerAvistamientoPublicacion(idPublicacion).then((response) => {
                 setPublicacion({...publicacion, avistamiento: response.data});
-                // console.log("AVISTAMIENTOS DE LA PUBLICACION",response);
+                console.log("AVISTAMIENTOS DE LA PUBLICACION",response);
             });
 
             setActualizarAvistamientos({actualizar: false, idPublicacion: null});
@@ -178,6 +178,13 @@ export default function ModalAdentroPublicaciones({ open, handleClose, idPublica
         )
     }
 
+    const descargarreportepolicia = (urlReporte) => {
+        const downloadLink = document.createElement('a');
+        downloadLink.href = urlReporte;
+        downloadLink.target = '_blank'; // Abrir en nueva ventana o pestaña
+        downloadLink.click();  
+    }
+
     return (
         <Modal open={open} onClose={handleCloseFinal} className="content-center">
             <div
@@ -214,7 +221,8 @@ export default function ModalAdentroPublicaciones({ open, handleClose, idPublica
                             className="h-[80%] w-[25vw] rounded-md object-fill"
                             alt="Imagen no Disponible"
                         />
-                        <button className="bg-[#233E58] text-white rounded-md p-2 mt-[3%] flex items-center justify-center h-[14%] w-[100%] mx-auto">Ver reporte de la policía</button>
+                        <button 
+                            className="bg-[#233E58] text-white rounded-md p-2 mt-[3%] flex items-center justify-center h-[14%] w-[100%] mx-auto" onClick={() => descargarreportepolicia(publicacion?.reporte_policia?.fotospublicacion[0]?.urlarchivo)}>Ver reporte de la policía</button>
                     </div>
 
                     <div className="flex-1 flex-col ml-5 h-full   rounded-md overflow-auto">
