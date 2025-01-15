@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState,useEffect } from 'react';
+import { useState,useEffect, Suspense } from 'react';
 import { FaEye, FaEyeSlash} from "react-icons/fa6";
 import { cambiarContrasena, verificarToken } from '../../../services/userService';
 import { toast, ToastContainer } from "react-toastify";
@@ -9,7 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { eliminarToken, obtenerToken, guardarToken } from '../../../services/cookiesServices';
 import Spinner from '../components/spinComponent';
 
-export default function Login() {
+function Login() {
   const [password, setPassword] = useState('');
   const searchParams = useSearchParams();
   const [accessToken, setAccessToken] = useState(null);
@@ -250,5 +250,13 @@ export default function Login() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function NuevaContrasena() {
+  return (
+    <Suspense fallback={<Spinner />}>
+      <Login />
+    </Suspense>
   );
 }

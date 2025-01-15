@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { use, useState,useEffect } from 'react';
+import { useState,useEffect, Suspense } from 'react';
 import { toast, ToastContainer } from "react-toastify";
 import { useSearchParams } from 'next/navigation';
 import { eliminarToken, obtenerToken, guardarToken } from '../../../services/cookiesServices';
@@ -11,7 +11,7 @@ import Spinner from '../components/spinComponent';
 
 
 
-export default function Verified() {
+function Verified() {
     const searchParams = useSearchParams();
     const [accessToken, setAccessToken] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -133,3 +133,11 @@ const styles = {
     cursor: 'pointer',
   },
 };
+
+export default function NuevaContrasena() {
+  return (
+    <Suspense fallback={<Spinner />}>
+      <Verified />
+    </Suspense>
+  );
+}
