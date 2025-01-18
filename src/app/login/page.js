@@ -153,7 +153,13 @@ export default function Login() {
                 href="/signup"
                 className="mt-6 text-3xs font-medium text-blueInactive hover:underline block text-center mx-auto"
               >
-                No tienes cuenta? Regístrate aquí
+                ¿No tienes cuenta? Regístrate aquí
+              </a>
+              <a
+                href="/ayuda-en-linea"
+                className="mt-6 text-3xs font-medium text-blueInactive hover:underline block text-center mx-auto"
+              >
+                ¿Necesitas ayuda? Da click aquí
               </a>
             </div>
           </form>

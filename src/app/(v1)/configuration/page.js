@@ -240,6 +240,12 @@ export default function Configuracion() {
                                     <p className="text-xl font-bold text-blueOscuro">{userStatistics?.totalComentariosHechos}</p>
                                 </div>
                             </div>
+                            <a
+                                    href="/ayuda-en-linea"
+                                    className="mt-4 text-3xs font-medium text-blueInactive hover:underline block text-center mx-auto w-full"
+                                >
+                                    ¿Necesitas ayuda? Da click aquí
+                                </a>
                         </div>
                     ): loading && (
                         <div className="flex flex-col items-center bg-colorResumen rounded-md p-4 mb-4 w-3/4 shadow-md">
